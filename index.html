@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Wavefinger">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light only">
+<title>Wavefinger</title>
+<style>
+  :root{
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --panel-border: #f0d9c8;
+    --ink: #4a3626;
+    --ink-dim: #b89a80;
+    --accent: #ff7a1a;
+    --accent-deep: #f2590f;
+    --accent-ink: #ffffff;
+    --grid-line: rgba(74,54,38,0.06);
+    --grid-line-strong: rgba(74,54,38,0.13);
+    --shadow-soft: rgba(150,90,30,0.18);
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    color-scheme: light;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+    overflow: hidden;
+    overscroll-behavior: none;
+    touch-action: none;
+  }
+
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    width: 100%;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    flex: 0 0 auto;
+    padding: max(16px, env(safe-area-inset-top)) 18px 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  header h1 {
+    font-size: 16px;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    margin: 0;
+    color: var(--ink);
+  }
+  header .sub {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-ink);
+    letter-spacing: 0.02em;
+    padding: 5px 10px;
+    background: var(--accent);
+    border: none;
+    border-radius: 999px;
+  }
+  #noteReadout {
+    font-size: 11px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+    min-width: 54px;
+    text-align: right;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  #noteReadout.active { opacity: 1; }
+
+  /* ---------- Canvas area ---------- */
+  #canvasWrap {
+    flex: 1 1 auto;
+    position: relative;
+    margin: 0 12px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: none;
+    background: #fdfaf6;
+    box-shadow: 0 2px 14px var(--shadow-soft);
+  }
+  canvas { display: block; width: 100%; height: 100%; }
+
+  #hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: none;
+    color: var(--ink-dim);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 0 40px;
+    transition: opacity 0.5s ease;
+  }
+  #hint b { color: var(--ink); font-weight: 600; }
+  #hint svg { margin-bottom: 18px; opacity: 0.9; }
+
+  /* axis labels */
+  .axisLabel {
+    position: absolute;
+    font-size: 10px;
+    color: var(--ink-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+  .axisLabel.top { top: 8px; left: 50%; transform: translateX(-50%); }
+  .axisLabel.bottom { bottom: 8px; left: 50%; transform: translateX(-50%); }
+  .axisLabel.left { left: 8px; top: 50%; transform: translateY(-50%) rotate(-90deg); transform-origin: left top; }
+  .axisLabel.right { right: 8px; top: 50%; transform: translateY(-50%); text-align: right; }
+
+  /* ---------- Bottom control dock ---------- */
+  #dock {
+    flex: 0 0 auto;
+    padding: 14px 12px max(14px, env(safe-area-inset-bottom)) 12px;
+    background: linear-gradient(180deg, #ffb35c 0%, #ff8a2e 45%, #ff7a1a 100%);
+    border-radius: 24px 24px 0 0;
+    margin-top: 10px;
+  }
+
+  .row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  button.action {
+    flex: 1;
+    background: #ffffff;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 12px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 0 rgba(150,70,10,0.25);
+    transform: translateY(0);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  button.action:active {
+    background: #fff3e6;
+    transform: translateY(2px);
+    box-shadow: 0 0 0 rgba(150,70,10,0.25);
+  }
+  button.action.danger { color: var(--accent-deep); }
+  button.action.danger:active { background: #fff0e2; }
+
+  #settingsToggle {
+    width: 100%;
+    background: #ffffff;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 0 rgba(150,70,10,0.25);
+    transform: translateY(0);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  #settingsToggle:active {
+    background: #fff3e6;
+    transform: translateY(2px);
+    box-shadow: 0 0 0 rgba(150,70,10,0.25);
+  }
+  #settingsToggle .chev { transition: transform 0.25s ease; font-size: 10px; }
+  #settingsToggle.open .chev { transform: rotate(180deg); }
+
+  /* ---------- Full-screen Customize overlay ---------- */
+  #settingsOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(74,54,38,0);
+    pointer-events: none;
+    transition: background 0.32s ease;
+  }
+  #settingsOverlay.open {
+    background: rgba(74,54,38,0.35);
+    pointer-events: auto;
+  }
+
+  #settingsSheet {
+    width: 100%;
+    max-height: 88vh;
+    background: linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%);
+    border-radius: 28px 28px 0 0;
+    padding: 18px 18px max(18px, env(safe-area-inset-bottom)) 18px;
+    box-shadow: 0 -8px 40px rgba(74,54,38,0.3);
+    transform: translateY(100%) scale(0.96);
+    opacity: 0;
+    transition: transform 0.38s cubic-bezier(.2,.9,.25,1.1), opacity 0.28s ease;
+    overflow-y: auto;
+  }
+  #settingsOverlay.open #settingsSheet {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  #settingsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  #settingsHeader h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+  }
+  #closeSettings {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.25);
+    color: #ffffff;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  #closeSettings:active {
+    transform: scale(0.88);
+    background: rgba(255,255,255,0.4);
+  }
+
+  .panelInner {
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .field {
+    background: rgba(255,255,255,0.92);
+    border-radius: 16px;
+    padding: 12px 14px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+  .field label .val { color: var(--ink); text-transform: none; letter-spacing: 0; float: right; }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: #f0d9c8;
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid #ffffff;
+    box-shadow: 0 1px 4px rgba(150,70,10,0.4);
+  }
+
+  .swatchRow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .swatch {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    border: 3px solid #ffffff;
+    position: relative;
+    flex: 0 0 auto;
+    box-shadow: 0 1px 4px rgba(150,70,10,0.25);
+  }
+  .swatch.selected { border-color: var(--accent-deep); }
+  .swatch, .seg {
+    transform: translateY(0);
+    transition: transform 0.08s ease;
+  }
+  .swatch:active, .seg:active {
+    transform: scale(0.92);
+  }
+  @keyframes clickFlash {
+    0% { filter: brightness(1.5); }
+    100% { filter: brightness(1); }
+  }
+  .swatch.justSelected, .seg.justSelected { animation: clickFlash 0.15s ease-out; }
+  .swatch[data-c="orange"] { background: #ff5b3c; }
+  .swatch[data-c="cyan"] { background: #34e0d6; }
+  .swatch[data-c="violet"] { background: #9b6bff; }
+  .swatch[data-c="lime"] { background: #b6ff3c; }
+  .swatch[data-c="pink"] { background: #ff5ba0; }
+  .swatch[data-c="white"] { background: #f2f2f2; }
+  .swatch[data-c="rainbow"] {
+    background: conic-gradient(red, orange, yellow, lime, cyan, blue, violet, red);
+  }
+
+  .segRow { display: flex; gap: 6px; }
+  .seg {
+    flex: 1;
+    background: #fdf1e6;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 10px 4px;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .seg.selected {
+    background: var(--accent);
+    color: #fff;
+  }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand">
+      <h1>Wavefinger</h1>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <div id="noteReadout"></div>
+      <div class="sub" id="instrumentLabel">Sine</div>
+    </div>
+  </header>
+
+  <div id="canvasWrap">
+    <canvas id="pad"></canvas>
+    <div class="axisLabel top">higher pitch</div>
+    <div class="axisLabel bottom">lower pitch</div>
+    <div class="axisLabel left">quiet</div>
+    <div class="axisLabel right">full volume</div>
+    <div id="hint">
+      <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
+        <path id="idleWave" d="M0,24 Q15,4 30,24 T60,24 T90,24 T120,24" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Drag anywhere on the pad.<br><b>Up / down</b> bends pitch. <b>Left / right</b> bends volume.
+    </div>
+  </div>
+
+  <div id="dock">
+    <div class="row">
+      <button class="action danger" id="clearBtn">Clear trails</button>
+    </div>
+
+    <div id="settingsToggle">
+      <span>Customize</span>
+      <span class="chev">▾</span>
+    </div>
+  </div>
+
+</div>
+
+<div id="settingsOverlay">
+  <div id="settingsSheet">
+    <div id="settingsHeader">
+      <h2>Customize</h2>
+      <button id="closeSettings" aria-label="Close">✕</button>
+    </div>
+
+    <div class="panelInner">
+
+      <div class="field">
+        <label>Grid size <span class="val" id="gridVal">10 × 14</span></label>
+        <input type="range" id="gridSlider" min="4" max="24" step="1" value="10">
+      </div>
+
+      <div class="field">
+        <label>Trail color</label>
+        <div class="swatchRow" id="colorSwatches">
+          <div class="swatch selected" data-c="orange"></div>
+          <div class="swatch" data-c="cyan"></div>
+          <div class="swatch" data-c="violet"></div>
+          <div class="swatch" data-c="lime"></div>
+          <div class="swatch" data-c="pink"></div>
+          <div class="swatch" data-c="white"></div>
+          <div class="swatch" data-c="rainbow"></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Instrument</label>
+        <div class="segRow" id="instrumentSeg">
+          <div class="seg selected" data-i="sine">Sine</div>
+          <div class="seg" data-i="triangle">Triangle</div>
+          <div class="seg" data-i="square">Square</div>
+          <div class="seg" data-i="sawtooth">Saw</div>
+          <div class="seg" data-i="pluck">Pluck</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Pitch range</label>
+        <div class="segRow" id="rangeSeg">
+          <div class="seg" data-r="low">Low</div>
+          <div class="seg selected" data-r="mid">Mid</div>
+          <div class="seg" data-r="high">High</div>
+          <div class="seg" data-r="wide">Wide</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------- Canvas setup ----------
+  const canvas = document.getElementById('pad');
+  const ctx = canvas.getContext('2d');
+  const wrap = document.getElementById('canvasWrap');
+  const hint = document.getElementById('hint');
+  const noteReadout = document.getElementById('noteReadout');
+
+  let dpr = Math.max(1, window.devicePixelRatio || 1);
+  let W = 0, H = 0;
+
+  function resize(){
+    const r = wrap.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    drawGrid();
+  }
+  window.addEventListener('resize', resize);
+
+  // ---------- State ----------
+  const state = {
+    gridCols: 10,
+    gridRows: 14,
+    color: 'orange',
+    instrument: 'sine',
+    range: 'mid'
+  };
+
+  const colorHex = {
+    orange: '#ff5b3c',
+    cyan: '#34e0d6',
+    violet: '#9b6bff',
+    lime: '#b6ff3c',
+    pink: '#ff5ba0',
+    white: '#f2f2f2'
+  };
+
+  const rangeMap = {
+    low:  { min: 55,  max: 440 },   // A1 - A4
+    mid:  { min: 130, max: 1046 },  // C3 - C6
+    high: { min: 440, max: 2637 },  // A4 - E7
+    wide: { min: 40,  max: 3520 }   // E1 - A7
+  };
+
+  // ---------- Grid drawing ----------
+  function drawGrid(){
+    ctx.clearRect(0,0,W,H);
+    const cols = state.gridCols;
+    const rows = Math.round(cols * 1.4);
+    state.gridRows = rows;
+    document.getElementById('gridVal').textContent = cols + ' × ' + rows;
+
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-line');
+    ctx.lineWidth = 1;
+    for(let c=1;c<cols;c++){
+      const x = (c/cols)*W;
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    }
+    for(let r=1;r<rows;r++){
+      const y = (r/rows)*H;
+      ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
+    }
+    // center line slightly stronger
+    ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-line-strong');
+    const midY = H/2;
+    ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
+  }
+
+  // ---------- Audio ----------
+  let actx = null;
+  let master = null;
+  const voices = new Map(); // pointerId -> {osc, gain, filter?}
+
+  function ensureAudio(){
+    if(!actx){
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      master = actx.createGain();
+      master.gain.value = 0.9;
+      master.connect(actx.destination);
+    }
+    if(actx.state === 'suspended') return actx.resume();
+    return Promise.resolve();
+  }
+
+  // iOS sometimes needs an actual sound played (not just resume()) to fully unlock audio.
+  let unlockedOnce = false;
+  function silentUnlock(){
+    if(unlockedOnce || !actx) return;
+    unlockedOnce = true;
+    const buffer = actx.createBuffer(1, 1, 22050);
+    const src = actx.createBufferSource();
+    src.buffer = buffer;
+    src.connect(actx.destination);
+    src.start(0);
+  }
+
+  // short synthesized UI click, like a physical button press
+  let lastClickTime = 0;
+  function playClick(down){
+    const now = performance.now();
+    if(now - lastClickTime < 40) return; // debounce rapid double-fires
+    lastClickTime = now;
+    ensureAudio().then(()=>{
+      const t = actx.currentTime;
+      const osc = actx.createOscillator();
+      const g = actx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = down ? 900 : 1400;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+      osc.connect(g);
+      g.connect(actx.destination);
+      osc.start(t);
+      osc.stop(t + 0.05);
+    });
+  }
+
+  function freqFromY(yNorm){
+    // yNorm: 0 (top) = high pitch, 1 (bottom) = low pitch
+    const r = rangeMap[state.range];
+    const t = 1 - yNorm; // invert so up = high
+    // log scale for musical feel
+    const logMin = Math.log(r.min), logMax = Math.log(r.max);
+    return Math.exp(logMin + t*(logMax - logMin));
+  }
+
+  function volFromX(xNorm){
+    // xNorm 0 = quiet, 1 = full
+    return Math.max(0.0001, xNorm * xNorm); // curve for perceptual feel
+  }
+
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  function noteNameFromFreq(freq){
+    const midi = Math.round(69 + 12*Math.log2(freq/440));
+    const name = NOTE_NAMES[((midi%12)+12)%12];
+    const octave = Math.floor(midi/12) - 1;
+    return name + octave;
+  }
+
+  function makeVoice(){
+    const gain = actx.createGain();
+    gain.gain.value = 0;
+    gain.connect(master);
+
+    if(state.instrument === 'pluck'){
+      // simple plucked-string-ish: short decay triangle + noise burst
+      const osc = actx.createOscillator();
+      osc.type = 'triangle';
+      const filter = actx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 2200;
+      osc.connect(filter);
+      filter.connect(gain);
+      osc.start();
+      return { osc, gain, filter, isPluck: true };
+    } else {
+      const osc = actx.createOscillator();
+      osc.type = state.instrument;
+      osc.connect(gain);
+      osc.start();
+      return { osc, gain };
+    }
+  }
+
+  function updateVoice(v, freq, vol){
+    const now = actx.currentTime;
+    v.osc.frequency.setTargetAtTime(freq, now, 0.02);
+    if(v.isPluck){
+      // gentle envelope-ish behavior while dragging: retrigger amplitude slightly
+      v.gain.gain.setTargetAtTime(vol*0.8, now, 0.015);
+    } else {
+      v.gain.gain.setTargetAtTime(vol*0.6, now, 0.02);
+    }
+  }
+
+  function killVoice(v){
+    const now = actx.currentTime;
+    v.gain.gain.cancelScheduledValues(now);
+    v.gain.gain.setTargetAtTime(0.0001, now, 0.05);
+    if(v.stopped) return;
+    v.stopped = true;
+    setTimeout(()=>{
+      try{ v.osc.stop(); }catch(e){}
+      try{ v.osc.disconnect(); v.gain.disconnect(); if(v.filter) v.filter.disconnect(); }catch(e){}
+    }, 200);
+  }
+
+  // ---------- Trail drawing ----------
+  let hue = 0;
+  const paths = new Map(); // pointerId -> last point
+
+  function colorForStroke(pointerId, xNorm){
+    if(state.color === 'rainbow'){
+      hue = (hue + 2) % 360;
+      return `hsl(${hue}, 90%, 62%)`;
+    }
+    return colorHex[state.color];
+  }
+
+  function drawSegment(x0,y0,x1,y1,color,vol){
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 2 + vol*10;
+    ctx.shadowColor = color;
+    ctx.shadowBlur = 8 + vol*14;
+    ctx.globalAlpha = 0.5 + vol*0.5;
+    ctx.beginPath();
+    ctx.moveTo(x0,y0);
+    ctx.lineTo(x1,y1);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // fade trails slowly
+  function fadeLoop(){
+    ctx.save();
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = 'rgba(0,0,0,0.045)';
+    ctx.fillRect(0,0,W,H);
+    ctx.restore();
+    requestAnimationFrame(fadeLoop);
+  }
+
+  // ---------- Pointer handling ----------
+  function normFromEvent(e){
+    const r = canvas.getBoundingClientRect();
+    let x = (e.clientX - r.left) / r.width;
+    let y = (e.clientY - r.top) / r.height;
+    x = Math.min(1, Math.max(0, x));
+    y = Math.min(1, Math.max(0, y));
+    return {x,y};
+  }
+
+  // Snaps a normalized point to the grid, strength depends on grid density.
+  // Low gridCols (coarse grid) = strong snap. High gridCols (fine grid) = little/no snap.
+  function snapToGrid(x, y){
+    const cols = state.gridCols;
+    const rows = state.gridRows || Math.round(cols * 1.4);
+    const minCols = 4, maxCols = 24;
+    // snap strength: 1 at minCols (hard snap), 0 at maxCols (free-form)
+    const raw = 1 - (cols - minCols) / (maxCols - minCols);
+    const t = Math.pow(Math.max(0, Math.min(1, raw)), 0.6); // steeper falloff so mid-low values still snap firmly
+    if(t <= 0.02) return {x, y};
+    if(cols <= 6){
+      // very coarse grid: snap fully, no blend
+      const cellX = 1 / cols;
+      const cellY = 1 / rows;
+      return {
+        x: (Math.floor(x / cellX) + 0.5) * cellX,
+        y: (Math.floor(y / cellY) + 0.5) * cellY
+      };
+    }
+
+    const cellX = 1 / cols;
+    const cellY = 1 / rows;
+    const snappedX = (Math.floor(x / cellX) + 0.5) * cellX;
+    const snappedY = (Math.floor(y / cellY) + 0.5) * cellY;
+
+    return {
+      x: x + (snappedX - x) * t,
+      y: y + (snappedY - y) * t
+    };
+  }
+
+  const activePointerIds = new Set();
+
+  function onPointerDown(e){
+    ensureAudio();
+    silentUnlock();
+    canvas.setPointerCapture(e.pointerId);
+    let {x,y} = normFromEvent(e);
+    ({x,y} = snapToGrid(x,y));
+    activePointerIds.add(e.pointerId);
+    paths.set(e.pointerId, {x,y}); // always track position immediately, audio or not
+    hint.style.opacity = '0';
+
+    // create the voice synchronously, right in the gesture, instead of waiting on a promise.
+    // actx.resume() runs in the background; the oscillator will just start silently until it's ready.
+    if(actx && !voices.has(e.pointerId)){
+      const v = makeVoice();
+      voices.set(e.pointerId, v);
+      const freq = freqFromY(y);
+      const vol = volFromX(x);
+      updateVoice(v, freq, vol);
+      noteReadout.textContent = noteNameFromFreq(freq);
+      noteReadout.classList.add('active');
+    }
+  }
+
+  function onPointerMove(e){
+    if(!activePointerIds.has(e.pointerId)) return;
+    let {x,y} = normFromEvent(e);
+    ({x,y} = snapToGrid(x,y));
+    const last = paths.get(e.pointerId) || {x,y};
+    const vol = volFromX(x);
+    const freq = freqFromY(y);
+
+    const v = voices.get(e.pointerId);
+    if(v){
+      updateVoice(v, freq, vol);
+      noteReadout.textContent = noteNameFromFreq(freq);
+    }
+
+    const color = colorForStroke(e.pointerId, x);
+    drawSegment(last.x*W, last.y*H, x*W, y*H, color, vol);
+    paths.set(e.pointerId, {x,y});
+  }
+
+  function onPointerUp(e){
+    activePointerIds.delete(e.pointerId);
+    const v = voices.get(e.pointerId);
+    if(v){ killVoice(v); voices.delete(e.pointerId); }
+    paths.delete(e.pointerId);
+    if(voices.size === 0) noteReadout.classList.remove('active');
+  }
+
+  canvas.addEventListener('pointerdown', onPointerDown);
+  canvas.addEventListener('pointermove', onPointerMove);
+  canvas.addEventListener('pointerup', onPointerUp);
+  canvas.addEventListener('pointercancel', onPointerUp);
+  canvas.addEventListener('pointerleave', (e)=>{ if(e.pointerType==='mouse') onPointerUp(e); });
+  // safety net: if the pointerup happens outside the canvas (finger dragged off pad and lifted),
+  // still make sure the voice is killed so it can't be left playing indefinitely.
+  window.addEventListener('pointerup', onPointerUp);
+  window.addEventListener('pointercancel', onPointerUp);
+  window.addEventListener('blur', ()=>{
+    voices.forEach(v=>killVoice(v));
+    voices.clear();
+    paths.clear();
+    noteReadout.classList.remove('active');
+  });
+
+  // ---------- Controls ----------
+  document.addEventListener('pointerdown', (e)=>{
+    if(e.target.closest('button, .swatch, .seg, #settingsToggle')) playClick(true);
+  });
+  document.addEventListener('pointerup', (e)=>{
+    if(e.target.closest('button, .swatch, .seg, #settingsToggle')) playClick(false);
+  });
+
+  document.getElementById('clearBtn').addEventListener('click', ()=>{
+    ctx.clearRect(0,0,W,H);
+    drawGrid();
+  });
+
+  const settingsToggle = document.getElementById('settingsToggle');
+  const settingsOverlay = document.getElementById('settingsOverlay');
+  const closeSettings = document.getElementById('closeSettings');
+
+  function openSettings(){
+    settingsToggle.classList.add('open');
+    settingsOverlay.classList.add('open');
+  }
+  function closeSettingsPanel(){
+    settingsToggle.classList.remove('open');
+    settingsOverlay.classList.remove('open');
+  }
+  settingsToggle.addEventListener('click', openSettings);
+  closeSettings.addEventListener('click', closeSettingsPanel);
+  // tap the dimmed backdrop (outside the sheet) to close
+  settingsOverlay.addEventListener('click', (e)=>{
+    if(e.target === settingsOverlay) closeSettingsPanel();
+  });
+
+  const gridSlider = document.getElementById('gridSlider');
+  function applyGridSize(){
+    state.gridCols = parseInt(gridSlider.value,10);
+    drawGrid();
+  }
+  gridSlider.addEventListener('input', applyGridSize);
+  gridSlider.addEventListener('change', applyGridSize);
+  gridSlider.addEventListener('touchend', applyGridSize);
+
+  document.getElementById('colorSwatches').addEventListener('click', (e)=>{
+    const sw = e.target.closest('.swatch');
+    if(!sw) return;
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
+    sw.classList.add('selected');
+    sw.classList.remove('justSelected'); void sw.offsetWidth; sw.classList.add('justSelected');
+    state.color = sw.dataset.c;
+  });
+
+  const instrumentLabel = document.getElementById('instrumentLabel');
+  const instNames = {sine:'Sine', triangle:'Triangle', square:'Square', sawtooth:'Saw', pluck:'Pluck'};
+  document.getElementById('instrumentSeg').addEventListener('click', (e)=>{
+    const seg = e.target.closest('.seg');
+    if(!seg) return;
+    document.querySelectorAll('#instrumentSeg .seg').forEach(s=>s.classList.remove('selected'));
+    seg.classList.add('selected');
+    seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
+    state.instrument = seg.dataset.i;
+    instrumentLabel.textContent = instNames[state.instrument];
+  });
+
+  document.getElementById('rangeSeg').addEventListener('click', (e)=>{
+    const seg = e.target.closest('.seg');
+    if(!seg) return;
+    document.querySelectorAll('#rangeSeg .seg').forEach(s=>s.classList.remove('selected'));
+    seg.classList.add('selected');
+    seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
+    state.range = seg.dataset.r;
+  });
+
+  // ---------- Init ----------
+  resize();
+  requestAnimationFrame(resize);
+  setTimeout(resize, 60);
+  setTimeout(resize, 300);
+  if(window.ResizeObserver){
+    new ResizeObserver(resize).observe(wrap);
+  }
+  requestAnimationFrame(fadeLoop);
+
+  // animate idle waveform
+  const idleWave = document.getElementById('idleWave');
+  if(idleWave){
+    let t0 = performance.now();
+    function animateIdle(now){
+      const t = (now - t0) / 1000;
+      const amp = 6 + Math.sin(t*1.3)*2;
+      const phase = t * 40;
+      let d = `M0,24`;
+      for(let x=0; x<=120; x+=6){
+        const y = 24 + Math.sin((x+phase)*0.08) * amp * 0.5;
+        d += ` L${x},${y.toFixed(1)}`;
+      }
+      idleWave.setAttribute('d', d);
+      requestAnimationFrame(animateIdle);
+    }
+    requestAnimationFrame(animateIdle);
+  }
+
+  // prevent iOS bounce/scroll
+  document.addEventListener('touchmove', (e)=>{
+    if(e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+  }, {passive:false});
+})();
+</script>
+</body>
+</html>
