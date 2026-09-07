@@ -95,7 +95,7 @@
     border-radius: 20px;
     overflow: hidden;
     border: none;
-    background: #fdfaf6;
+    background: var(--canvas-bg, #fdfaf6);
     box-shadow: 0 2px 14px var(--shadow-soft);
   }
   canvas { display: block; width: 100%; height: 100%; }
@@ -223,6 +223,8 @@
     opacity: 0;
     transition: transform 0.38s cubic-bezier(.2,.9,.25,1.1), opacity 0.28s ease;
     overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
   #settingsOverlay.open #settingsSheet {
     transform: translateY(0) scale(1);
@@ -333,6 +335,8 @@
   }
 
   .segRow { display: flex; gap: 6px; }
+  .segRow.wrap { flex-wrap: wrap; }
+  .segRow.wrap .seg { flex: 0 1 auto; min-width: 68px; padding: 9px 10px; }
   .seg {
     flex: 1;
     background: #fdf1e6;
@@ -348,9 +352,124 @@
     background: var(--accent);
     color: #fff;
   }
+
+  /* ---------- Boot warning screen ---------- */
+  #bootWarning {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(74,54,38,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #bootWarningCard {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 26px 22px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(74,54,38,0.35);
+  }
+  .bwIcon { font-size: 34px; margin-bottom: 10px; }
+  #bootWarningCard h2 {
+    margin: 0 0 10px 0;
+    font-size: 17px;
+    color: var(--ink);
+    font-weight: 750;
+  }
+  #bootWarningCard p {
+    margin: 0 0 18px 0;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--ink-dim);
+  }
+  #bootWarningCard b { color: var(--accent-deep); }
+  #bootWarningOk {
+    width: 100%;
+    background: var(--accent);
+    border: none;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px;
+    border-radius: 999px;
+  }
+  #bootWarningOk:active { background: var(--accent-deep); }
+
+  /* ---------- Known bugs list ---------- */
+  .toggleRow {
+    display: flex;
+    gap: 8px;
+  }
+  .toggleBtn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: #fdf1e6;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 10px 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .toggleBtn .toggleDot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #e8d3bd;
+    flex-shrink: 0;
+    transition: background 0.15s ease;
+  }
+  .toggleBtn.selected {
+    background: var(--accent);
+    color: #fff;
+  }
+  .toggleBtn.selected .toggleDot {
+    background: #ffffff;
+  }
+
+  #knownBugs {
+    background: rgba(255,255,255,0.92);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  #knownBugs h3 {
+    margin: 0 0 8px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  #knownBugs ul {
+    margin: 0;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #knownBugs li {
+    font-size: 12.5px;
+    color: var(--ink);
+    line-height: 1.4;
+  }
   </style>
 </head>
 <body>
+<div id="bootWarning">
+  <div id="bootWarningCard">
+    <div class="bwIcon">⚠️</div>
+    <h2>Heads up — this is buggy</h2>
+    <p>Wavefinger is a work in progress. A few things don't work right yet — see <b>Customize → Known Bugs</b> for the list. Sound especially may need a couple of taps to kick in on iOS.</p>
+    <button id="bootWarningOk">Got it, continue</button>
+  </div>
+</div>
+
 <div id="app">
 
   <header>
@@ -367,18 +486,18 @@
     <canvas id="pad"></canvas>
     <div class="axisLabel top">higher pitch</div>
     <div class="axisLabel bottom">lower pitch</div>
-    <div class="axisLabel left">quiet</div>
-    <div class="axisLabel right">full volume</div>
     <div id="hint">
       <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
         <path id="idleWave" d="M0,24 Q15,4 30,24 T60,24 T90,24 T120,24" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"/>
       </svg>
-      Drag anywhere on the pad.<br><b>Up / down</b> bends pitch. <b>Left / right</b> bends volume.
+      Drag anywhere on the pad.<br><b>Up / down</b> bends pitch.
     </div>
   </div>
 
   <div id="dock">
     <div class="row">
+      <button class="action" id="undoBtn">Undo</button>
+      <button class="action" id="muteBtn">Mute</button>
       <button class="action danger" id="clearBtn">Clear trails</button>
     </div>
 
@@ -405,6 +524,11 @@
       </div>
 
       <div class="field">
+        <label>Line thickness <span class="val" id="thicknessVal">6px</span></label>
+        <input type="range" id="thicknessSlider" min="2" max="20" step="1" value="6">
+      </div>
+
+      <div class="field">
         <label>Trail color</label>
         <div class="swatchRow" id="colorSwatches">
           <div class="swatch selected" data-c="orange"></div>
@@ -419,12 +543,17 @@
 
       <div class="field">
         <label>Instrument</label>
-        <div class="segRow" id="instrumentSeg">
+        <div class="segRow wrap" id="instrumentSeg">
           <div class="seg selected" data-i="sine">Sine</div>
           <div class="seg" data-i="triangle">Triangle</div>
           <div class="seg" data-i="square">Square</div>
           <div class="seg" data-i="sawtooth">Saw</div>
           <div class="seg" data-i="pluck">Pluck</div>
+          <div class="seg" data-i="organ">Organ</div>
+          <div class="seg" data-i="choir">Choir</div>
+          <div class="seg" data-i="bell">Bell</div>
+          <div class="seg" data-i="wind">Wind</div>
+          <div class="seg" data-i="arp8bit">8-Bit</div>
         </div>
       </div>
 
@@ -436,6 +565,70 @@
           <div class="seg" data-r="high">High</div>
           <div class="seg" data-r="wide">Wide</div>
         </div>
+      </div>
+
+      <div class="field">
+        <label>Musical scale</label>
+        <div class="segRow" id="scaleSeg">
+          <div class="seg selected" data-s="chromatic">Free</div>
+          <div class="seg" data-s="major">Major</div>
+          <div class="seg" data-s="minor">Minor</div>
+          <div class="seg" data-s="pentatonic">Penta</div>
+          <div class="seg" data-s="blues">Blues</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Background</label>
+        <div class="segRow" id="bgSeg">
+          <div class="seg selected" data-bg="cream">Cream</div>
+          <div class="seg" data-bg="paper">Paper</div>
+          <div class="seg" data-bg="midnight">Midnight</div>
+          <div class="seg" data-bg="slate">Slate</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Effects</label>
+        <div class="toggleRow">
+          <button class="toggleBtn" id="echoToggle">
+            <span>Echo</span>
+            <span class="toggleDot"></span>
+          </button>
+          <button class="toggleBtn" id="sustainToggle">
+            <span>Sustain</span>
+            <span class="toggleDot"></span>
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Touch explosions</label>
+        <div class="toggleRow" style="margin-bottom: 12px;">
+          <button class="toggleBtn" id="particlesToggle">
+            <span>Enabled</span>
+            <span class="toggleDot"></span>
+          </button>
+        </div>
+        <label style="margin-bottom: 6px;">Intensity <span class="val" id="particleIntensityVal">10</span></label>
+        <input type="range" id="particleIntensitySlider" min="0" max="30" step="1" value="10">
+        <div class="segRow" id="particleStyleSeg" style="margin-top: 10px;">
+          <div class="seg selected" data-p="burst">Burst</div>
+          <div class="seg" data-p="sparkle">Sparkle</div>
+          <div class="seg" data-p="ring">Ring</div>
+        </div>
+      </div>
+
+      <div id="knownBugs">
+        <h3>Known Bugs</h3>
+        <ul>
+          <li>On iOS Safari, sound sometimes doesn't play on the very first touch — try tapping the pad again, or open Customize once first.</li>
+          <li>Grid snapping at low grid-size values can feel inconsistent on fast swipes.</li>
+          <li>Multi-finger (chord) playing may occasionally leave a note stuck on until you tap Clear trails or reload.</li>
+          <li>Sustain mode can leave notes ringing indefinitely — use "Clear trails" or "Mute" to stop all sound.</li>
+          <li>Undo only stores the last 15 strokes and clears when you tap "Clear trails."</li>
+          <li>Wind and Organ instruments are more CPU-intensive — may stutter on older devices with many fingers down at once.</li>
+        </ul>
       </div>
 
     </div>
@@ -474,7 +667,15 @@
     gridRows: 14,
     color: 'orange',
     instrument: 'sine',
-    range: 'mid'
+    range: 'mid',
+    lineThickness: 6,
+    scale: 'chromatic',   // musical scale quantization
+    echo: false,          // echo/delay effect
+    sustain: false,       // hold notes after lifting finger
+    particles: false,     // burst of particles on new touch — opt-in, off by default
+    particleIntensity: 10,
+    particleStyle: 'burst',
+    bgTheme: 'cream'       // canvas background theme
   };
 
   const colorHex = {
@@ -485,6 +686,22 @@
     pink: '#ff5ba0',
     white: '#f2f2f2'
   };
+
+  const bgThemes = {
+    cream:     '#fdfaf6',
+    midnight:  '#12141c',
+    paper:     '#f5f0e6',
+    slate:     '#1e2530'
+  };
+  function applyBgTheme(){
+    const hex = bgThemes[state.bgTheme] || bgThemes.cream;
+    wrap.style.setProperty('--canvas-bg', hex);
+    // dark themes need brighter grid lines so they stay visible
+    const isDark = (state.bgTheme === 'midnight' || state.bgTheme === 'slate');
+    document.documentElement.style.setProperty('--grid-line', isDark ? 'rgba(255,255,255,0.10)' : 'rgba(74,54,38,0.06)');
+    document.documentElement.style.setProperty('--grid-line-strong', isDark ? 'rgba(255,255,255,0.20)' : 'rgba(74,54,38,0.13)');
+    drawGrid();
+  }
 
   const rangeMap = {
     low:  { min: 55,  max: 440 },   // A1 - A4
@@ -520,6 +737,8 @@
   // ---------- Audio ----------
   let actx = null;
   let master = null;
+  let delayNode = null;
+  let delayFeedback = null;
   const voices = new Map(); // pointerId -> {osc, gain, filter?}
 
   function ensureAudio(){
@@ -527,10 +746,26 @@
       actx = new (window.AudioContext || window.webkitAudioContext)();
       master = actx.createGain();
       master.gain.value = 0.9;
+
+      // echo/delay send, toggled on/off via feedback gain
+      delayNode = actx.createDelay(1.0);
+      delayNode.delayTime.value = 0.28;
+      delayFeedback = actx.createGain();
+      delayFeedback.gain.value = 0; // 0 = off, set to ~0.35 when echo enabled
+      delayNode.connect(delayFeedback);
+      delayFeedback.connect(delayNode);
+
       master.connect(actx.destination);
+      master.connect(delayNode);
+      delayNode.connect(actx.destination);
     }
     if(actx.state === 'suspended') return actx.resume();
     return Promise.resolve();
+  }
+
+  function setEcho(on){
+    state.echo = on;
+    if(delayFeedback) delayFeedback.gain.setTargetAtTime(on ? 0.35 : 0, actx.currentTime, 0.05);
   }
 
   // iOS sometimes needs an actual sound played (not just resume()) to fully unlock audio.
@@ -567,19 +802,43 @@
     });
   }
 
+  const SCALES = {
+    chromatic: [0,1,2,3,4,5,6,7,8,9,10,11],
+    major:     [0,2,4,5,7,9,11],
+    minor:     [0,2,3,5,7,8,10],
+    pentatonic:[0,2,4,7,9],
+    blues:     [0,3,5,6,7,10]
+  };
+
+  function quantizeToScale(freq){
+    if(state.scale === 'chromatic') return freq;
+    const scaleSteps = SCALES[state.scale] || SCALES.chromatic;
+    const midi = 69 + 12*Math.log2(freq/440);
+    const midiRound = Math.round(midi);
+    const octave = Math.floor(midiRound / 12);
+    const noteInOctave = ((midiRound % 12) + 12) % 12;
+    // find nearest scale step
+    let closest = scaleSteps[0];
+    let bestDist = Infinity;
+    for(const s of scaleSteps){
+      const d = Math.abs(s - noteInOctave);
+      if(d < bestDist){ bestDist = d; closest = s; }
+    }
+    const snappedMidi = octave*12 + closest;
+    return 440 * Math.pow(2, (snappedMidi - 69)/12);
+  }
+
   function freqFromY(yNorm){
     // yNorm: 0 (top) = high pitch, 1 (bottom) = low pitch
     const r = rangeMap[state.range];
     const t = 1 - yNorm; // invert so up = high
     // log scale for musical feel
     const logMin = Math.log(r.min), logMax = Math.log(r.max);
-    return Math.exp(logMin + t*(logMax - logMin));
+    const freq = Math.exp(logMin + t*(logMax - logMin));
+    return quantizeToScale(freq);
   }
 
-  function volFromX(xNorm){
-    // xNorm 0 = quiet, 1 = full
-    return Math.max(0.0001, xNorm * xNorm); // curve for perceptual feel
-  }
+  const FIXED_VOLUME = 0.55; // volume no longer controlled by swipe position
 
   const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   function noteNameFromFreq(freq){
@@ -593,9 +852,9 @@
     const gain = actx.createGain();
     gain.gain.value = 0;
     gain.connect(master);
+    const inst = state.instrument;
 
-    if(state.instrument === 'pluck'){
-      // simple plucked-string-ish: short decay triangle + noise burst
+    if(inst === 'pluck'){
       const osc = actx.createOscillator();
       osc.type = 'triangle';
       const filter = actx.createBiquadFilter();
@@ -604,22 +863,113 @@
       osc.connect(filter);
       filter.connect(gain);
       osc.start();
-      return { osc, gain, filter, isPluck: true };
+      return { oscs: [osc], gain, filter, isPluck: true };
+
+    } else if(inst === 'organ'){
+      // additive: fundamental + octave + fifth, classic organ drawbar feel
+      const ratios = [1, 2, 3];
+      const weights = [1, 0.5, 0.3];
+      const oscs = ratios.map((r, i)=>{
+        const o = actx.createOscillator();
+        o.type = 'sine';
+        const g = actx.createGain();
+        g.gain.value = weights[i];
+        o.connect(g);
+        g.connect(gain);
+        o.start();
+        return o;
+      });
+      return { oscs, gain, ratios, isOrgan: true };
+
+    } else if(inst === 'choir'){
+      // three slightly detuned triangles for a chorus-like shimmer
+      const detunes = [-7, 0, 8];
+      const oscs = detunes.map(d=>{
+        const o = actx.createOscillator();
+        o.type = 'triangle';
+        o.detune.value = d;
+        const g = actx.createGain();
+        g.gain.value = 0.5;
+        o.connect(g);
+        g.connect(gain);
+        o.start();
+        return o;
+      });
+      return { oscs, gain, isChoir: true };
+
+    } else if(inst === 'bell'){
+      // simple FM-ish bell: carrier + fast-decaying overtone
+      const carrier = actx.createOscillator();
+      carrier.type = 'sine';
+      const overtone = actx.createOscillator();
+      overtone.type = 'sine';
+      const overtoneGain = actx.createGain();
+      overtoneGain.gain.value = 0.4;
+      overtone.connect(overtoneGain);
+      overtoneGain.connect(gain);
+      carrier.connect(gain);
+      carrier.start(); overtone.start();
+      return { oscs: [carrier, overtone], gain, overtoneGain, isBell: true, ratio: 2.4 };
+
+    } else if(inst === 'wind'){
+      // filtered noise, airy pad
+      const bufferSize = actx.sampleRate * 2;
+      const buffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++) data[i] = Math.random()*2 - 1;
+      const noise = actx.createBufferSource();
+      noise.buffer = buffer;
+      noise.loop = true;
+      const filter = actx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 6;
+      noise.connect(filter);
+      filter.connect(gain);
+      noise.start();
+      return { oscs: [], noise, gain, filter, isWind: true };
+
+    } else if(inst === 'arp8bit'){
+      // chiptune-ish square with fast vibrato/arp shimmer
+      const osc = actx.createOscillator();
+      osc.type = 'square';
+      const lfo = actx.createOscillator();
+      lfo.frequency.value = 14;
+      const lfoGain = actx.createGain();
+      lfoGain.gain.value = 6;
+      lfo.connect(lfoGain);
+      lfoGain.connect(osc.detune);
+      osc.connect(gain);
+      osc.start(); lfo.start();
+      return { oscs: [osc], gain, lfo, isArp: true };
+
     } else {
       const osc = actx.createOscillator();
-      osc.type = state.instrument;
+      osc.type = inst;
       osc.connect(gain);
       osc.start();
-      return { osc, gain };
+      return { oscs: [osc], gain };
     }
   }
 
   function updateVoice(v, freq, vol){
     const now = actx.currentTime;
-    v.osc.frequency.setTargetAtTime(freq, now, 0.02);
+
+    if(v.isOrgan){
+      v.oscs.forEach((o,i)=> o.frequency.setTargetAtTime(freq*v.ratios[i], now, 0.02));
+    } else if(v.isBell){
+      v.oscs[0].frequency.setTargetAtTime(freq, now, 0.02);
+      v.oscs[1].frequency.setTargetAtTime(freq*v.ratio, now, 0.02);
+    } else if(v.isWind){
+      // map pitch to filter center frequency instead of oscillator pitch
+      v.filter.frequency.setTargetAtTime(200 + freq*1.5, now, 0.05);
+    } else {
+      v.oscs.forEach(o => o.frequency.setTargetAtTime(freq, now, 0.02));
+    }
+
     if(v.isPluck){
-      // gentle envelope-ish behavior while dragging: retrigger amplitude slightly
       v.gain.gain.setTargetAtTime(vol*0.8, now, 0.015);
+    } else if(v.isWind){
+      v.gain.gain.setTargetAtTime(vol*0.35, now, 0.03);
     } else {
       v.gain.gain.setTargetAtTime(vol*0.6, now, 0.02);
     }
@@ -632,8 +982,17 @@
     if(v.stopped) return;
     v.stopped = true;
     setTimeout(()=>{
-      try{ v.osc.stop(); }catch(e){}
-      try{ v.osc.disconnect(); v.gain.disconnect(); if(v.filter) v.filter.disconnect(); }catch(e){}
+      try{ v.oscs.forEach(o=>o.stop()); }catch(e){}
+      try{ if(v.noise) v.noise.stop(); }catch(e){}
+      try{ if(v.lfo) v.lfo.stop(); }catch(e){}
+      try{
+        v.oscs.forEach(o=>o.disconnect());
+        v.gain.disconnect();
+        if(v.filter) v.filter.disconnect();
+        if(v.noise) v.noise.disconnect();
+        if(v.lfo) v.lfo.disconnect();
+        if(v.overtoneGain) v.overtoneGain.disconnect();
+      }catch(e){}
     }, 200);
   }
 
@@ -649,14 +1008,14 @@
     return colorHex[state.color];
   }
 
-  function drawSegment(x0,y0,x1,y1,color,vol){
+  function drawSegment(x0,y0,x1,y1,color){
     ctx.save();
     ctx.strokeStyle = color;
     ctx.lineCap = 'round';
-    ctx.lineWidth = 2 + vol*10;
+    ctx.lineWidth = state.lineThickness;
     ctx.shadowColor = color;
-    ctx.shadowBlur = 8 + vol*14;
-    ctx.globalAlpha = 0.5 + vol*0.5;
+    ctx.shadowBlur = 6 + state.lineThickness*1.2;
+    ctx.globalAlpha = 0.85;
     ctx.beginPath();
     ctx.moveTo(x0,y0);
     ctx.lineTo(x1,y1);
@@ -664,15 +1023,62 @@
     ctx.restore();
   }
 
-  // fade trails slowly
-  function fadeLoop(){
-    ctx.save();
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = 'rgba(0,0,0,0.045)';
-    ctx.fillRect(0,0,W,H);
-    ctx.restore();
-    requestAnimationFrame(fadeLoop);
+  // ---------- Particle burst effect ----------
+  let particles = [];
+  function spawnBurst(px, py, color){
+    if(!state.particles || state.particleIntensity <= 0) return;
+    const count = state.particleIntensity;
+    const style = state.particleStyle;
+
+    if(style === 'ring'){
+      // all particles launch at the same speed, forming an expanding ring
+      for(let i=0;i<count;i++){
+        const angle = (Math.PI*2*i)/count;
+        const speed = 2.4;
+        particles.push({ x: px, y: py, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, color, noGravity: true });
+      }
+    } else if(style === 'sparkle'){
+      // small, slow, twinkly dots that drift gently and don't fall
+      for(let i=0;i<count;i++){
+        const angle = Math.random()*Math.PI*2;
+        const speed = 0.3 + Math.random()*0.8;
+        particles.push({ x: px, y: py, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, color, noGravity: true, sparkle: true });
+      }
+    } else {
+      // burst (default): energetic outward explosion with gravity
+      for(let i=0;i<count;i++){
+        const angle = (Math.PI*2*i)/count + Math.random()*0.4;
+        const speed = 1.5 + Math.random()*2.5;
+        particles.push({ x: px, y: py, vx: Math.cos(angle)*speed, vy: Math.sin(angle)*speed, life: 1, color });
+      }
+    }
   }
+  function stepParticles(){
+    if(particles.length === 0) return;
+    ctx.save();
+    particles.forEach(p=>{
+      p.x += p.vx; p.y += p.vy;
+      if(!p.noGravity) p.vy += 0.06;
+      p.life -= p.sparkle ? 0.018 : 0.035;
+      if(p.life > 0){
+        const twinkle = p.sparkle ? (0.5 + 0.5*Math.sin(p.life*20)) : 1;
+        ctx.globalAlpha = Math.max(0, p.life) * twinkle;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        const r = p.sparkle ? 1.8 : (2.5*p.life + 1);
+        ctx.arc(p.x, p.y, r, 0, Math.PI*2);
+        ctx.fill();
+      }
+    });
+    ctx.restore();
+    particles = particles.filter(p => p.life > 0);
+  }
+  function particleLoop(){
+    if(particles.length > 0) stepParticles();
+    requestAnimationFrame(particleLoop);
+  }
+
+  // trails are persistent — no fade loop. Use "Clear trails" to reset the pad.
 
   // ---------- Pointer handling ----------
   function normFromEvent(e){
@@ -684,38 +1090,47 @@
     return {x,y};
   }
 
-  // Snaps a normalized point to the grid, strength depends on grid density.
-  // Low gridCols (coarse grid) = strong snap. High gridCols (fine grid) = little/no snap.
+  // Snap strength is driven directly by the grid slider position.
+  // High slider value (dense grid, small cells) = intense snap.
+  // Low slider value (coarse grid, big cells) = no snap, fully free-form.
+  function getSnapStrength(){
+    const cols = state.gridCols;
+    const minCols = 4, maxCols = 24;
+    const t = 1 - (cols - minCols) / (maxCols - minCols); // 1 at min (coarse=intense snap), 0 at max (fine=free-form)
+    return Math.max(0, Math.min(1, t));
+  }
+
   function snapToGrid(x, y){
+    const strength = getSnapStrength();
+    if(strength <= 0.001) return {x, y}; // lowest setting: no snapping at all
+
     const cols = state.gridCols;
     const rows = state.gridRows || Math.round(cols * 1.4);
-    const minCols = 4, maxCols = 24;
-    // snap strength: 1 at minCols (hard snap), 0 at maxCols (free-form)
-    const raw = 1 - (cols - minCols) / (maxCols - minCols);
-    const t = Math.pow(Math.max(0, Math.min(1, raw)), 0.6); // steeper falloff so mid-low values still snap firmly
-    if(t <= 0.02) return {x, y};
-    if(cols <= 6){
-      // very coarse grid: snap fully, no blend
-      const cellX = 1 / cols;
-      const cellY = 1 / rows;
-      return {
-        x: (Math.floor(x / cellX) + 0.5) * cellX,
-        y: (Math.floor(y / cellY) + 0.5) * cellY
-      };
-    }
-
     const cellX = 1 / cols;
     const cellY = 1 / rows;
-    const snappedX = (Math.floor(x / cellX) + 0.5) * cellX;
-    const snappedY = (Math.floor(y / cellY) + 0.5) * cellY;
+    // snap to the nearest grid LINE (integer intersection), matching what's actually drawn
+    const snappedX = Math.round(x / cellX) * cellX;
+    const snappedY = Math.round(y / cellY) * cellY;
 
+    // apply a steeper curve so the top end of the slider feels genuinely "intense"
+    const blend = state.gridCols <= 6 ? 1 : Math.pow(strength, 0.5);
     return {
-      x: x + (snappedX - x) * t,
-      y: y + (snappedY - y) * t
+      x: x + (snappedX - x) * blend,
+      y: y + (snappedY - y) * blend
     };
   }
 
   const activePointerIds = new Set();
+
+  let undoStack = [];
+  const MAX_UNDO = 15;
+
+  function saveUndoSnapshot(){
+    try{
+      undoStack.push(ctx.getImageData(0,0,canvas.width,canvas.height));
+      if(undoStack.length > MAX_UNDO) undoStack.shift();
+    }catch(e){}
+  }
 
   function onPointerDown(e){
     ensureAudio();
@@ -726,6 +1141,7 @@
     activePointerIds.add(e.pointerId);
     paths.set(e.pointerId, {x,y}); // always track position immediately, audio or not
     hint.style.opacity = '0';
+    saveUndoSnapshot(); // one snapshot per new stroke, before drawing begins
 
     // create the voice synchronously, right in the gesture, instead of waiting on a promise.
     // actx.resume() runs in the background; the oscillator will just start silently until it's ready.
@@ -733,11 +1149,11 @@
       const v = makeVoice();
       voices.set(e.pointerId, v);
       const freq = freqFromY(y);
-      const vol = volFromX(x);
-      updateVoice(v, freq, vol);
+      updateVoice(v, freq, FIXED_VOLUME);
       noteReadout.textContent = noteNameFromFreq(freq);
       noteReadout.classList.add('active');
     }
+    spawnBurst(x*W, y*H, colorForStroke(e.pointerId, x));
   }
 
   function onPointerMove(e){
@@ -745,26 +1161,36 @@
     let {x,y} = normFromEvent(e);
     ({x,y} = snapToGrid(x,y));
     const last = paths.get(e.pointerId) || {x,y};
-    const vol = volFromX(x);
     const freq = freqFromY(y);
 
     const v = voices.get(e.pointerId);
     if(v){
-      updateVoice(v, freq, vol);
+      updateVoice(v, freq, FIXED_VOLUME);
       noteReadout.textContent = noteNameFromFreq(freq);
     }
 
     const color = colorForStroke(e.pointerId, x);
-    drawSegment(last.x*W, last.y*H, x*W, y*H, color, vol);
+    drawSegment(last.x*W, last.y*H, x*W, y*H, color);
     paths.set(e.pointerId, {x,y});
   }
 
   function onPointerUp(e){
     activePointerIds.delete(e.pointerId);
+    if(state.sustain){
+      // sustain mode: leave the voice ringing, don't kill it, just stop tracking movement
+      paths.delete(e.pointerId);
+      return;
+    }
     const v = voices.get(e.pointerId);
     if(v){ killVoice(v); voices.delete(e.pointerId); }
     paths.delete(e.pointerId);
     if(voices.size === 0) noteReadout.classList.remove('active');
+  }
+
+  function killAllSustainedVoices(){
+    voices.forEach(v => killVoice(v));
+    voices.clear();
+    noteReadout.classList.remove('active');
   }
 
   canvas.addEventListener('pointerdown', onPointerDown);
@@ -794,6 +1220,23 @@
   document.getElementById('clearBtn').addEventListener('click', ()=>{
     ctx.clearRect(0,0,W,H);
     drawGrid();
+    killAllSustainedVoices();
+    undoStack = [];
+  });
+
+  document.getElementById('undoBtn').addEventListener('click', ()=>{
+    if(undoStack.length === 0) return;
+    const snapshot = undoStack.pop();
+    ctx.putImageData(snapshot, 0, 0);
+  });
+
+  let isMuted = false;
+  const muteBtn = document.getElementById('muteBtn');
+  muteBtn.addEventListener('click', ()=>{
+    isMuted = !isMuted;
+    muteBtn.textContent = isMuted ? 'Unmute' : 'Mute';
+    muteBtn.classList.toggle('danger', isMuted);
+    if(master) master.gain.setTargetAtTime(isMuted ? 0 : 0.9, actx.currentTime, 0.05);
   });
 
   const settingsToggle = document.getElementById('settingsToggle');
@@ -823,6 +1266,16 @@
   gridSlider.addEventListener('input', applyGridSize);
   gridSlider.addEventListener('change', applyGridSize);
   gridSlider.addEventListener('touchend', applyGridSize);
+
+  const thicknessSlider = document.getElementById('thicknessSlider');
+  const thicknessVal = document.getElementById('thicknessVal');
+  function applyThickness(){
+    state.lineThickness = parseInt(thicknessSlider.value,10);
+    thicknessVal.textContent = state.lineThickness + 'px';
+  }
+  thicknessSlider.addEventListener('input', applyThickness);
+  thicknessSlider.addEventListener('change', applyThickness);
+  thicknessSlider.addEventListener('touchend', applyThickness);
 
   document.getElementById('colorSwatches').addEventListener('click', (e)=>{
     const sw = e.target.closest('.swatch');
@@ -854,15 +1307,84 @@
     state.range = seg.dataset.r;
   });
 
+  document.getElementById('scaleSeg').addEventListener('click', (e)=>{
+    const seg = e.target.closest('.seg');
+    if(!seg) return;
+    document.querySelectorAll('#scaleSeg .seg').forEach(s=>s.classList.remove('selected'));
+    seg.classList.add('selected');
+    seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
+    state.scale = seg.dataset.s;
+  });
+
+  document.getElementById('bgSeg').addEventListener('click', (e)=>{
+    const seg = e.target.closest('.seg');
+    if(!seg) return;
+    document.querySelectorAll('#bgSeg .seg').forEach(s=>s.classList.remove('selected'));
+    seg.classList.add('selected');
+    seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
+    state.bgTheme = seg.dataset.bg;
+    applyBgTheme();
+  });
+
+  const echoToggle = document.getElementById('echoToggle');
+  echoToggle.addEventListener('click', ()=>{
+    const on = !echoToggle.classList.contains('selected');
+    echoToggle.classList.toggle('selected', on);
+    ensureAudio().then(()=> setEcho(on));
+  });
+
+  const sustainToggle = document.getElementById('sustainToggle');
+  sustainToggle.addEventListener('click', ()=>{
+    const on = !sustainToggle.classList.contains('selected');
+    sustainToggle.classList.toggle('selected', on);
+    state.sustain = on;
+  });
+
+  const particlesToggle = document.getElementById('particlesToggle');
+  particlesToggle.addEventListener('click', ()=>{
+    const on = !particlesToggle.classList.contains('selected');
+    particlesToggle.classList.toggle('selected', on);
+    state.particles = on;
+  });
+
+  const particleIntensitySlider = document.getElementById('particleIntensitySlider');
+  const particleIntensityVal = document.getElementById('particleIntensityVal');
+  function applyParticleIntensity(){
+    state.particleIntensity = parseInt(particleIntensitySlider.value, 10);
+    particleIntensityVal.textContent = state.particleIntensity;
+  }
+  particleIntensitySlider.addEventListener('input', applyParticleIntensity);
+  particleIntensitySlider.addEventListener('change', applyParticleIntensity);
+  particleIntensitySlider.addEventListener('touchend', applyParticleIntensity);
+
+  document.getElementById('particleStyleSeg').addEventListener('click', (e)=>{
+    const seg = e.target.closest('.seg');
+    if(!seg) return;
+    document.querySelectorAll('#particleStyleSeg .seg').forEach(s=>s.classList.remove('selected'));
+    seg.classList.add('selected');
+    seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
+    state.particleStyle = seg.dataset.p;
+  });
+
+  // ---------- Boot warning ----------
+  const bootWarning = document.getElementById('bootWarning');
+  const bootWarningOk = document.getElementById('bootWarningOk');
+  bootWarningOk.addEventListener('click', ()=>{
+    bootWarning.style.display = 'none';
+  });
+
   // ---------- Init ----------
   resize();
+  applyBgTheme();
   requestAnimationFrame(resize);
+  requestAnimationFrame(particleLoop);
   setTimeout(resize, 60);
   setTimeout(resize, 300);
   if(window.ResizeObserver){
     new ResizeObserver(resize).observe(wrap);
   }
-  requestAnimationFrame(fadeLoop);
+  // fade loop disabled per user request — trails are persistent now
+
 
   // animate idle waveform
   const idleWave = document.getElementById('idleWave');
@@ -883,9 +1405,10 @@
     requestAnimationFrame(animateIdle);
   }
 
-  // prevent iOS bounce/scroll
+  // prevent iOS bounce/scroll (but allow scrolling inside the Customize sheet, and range inputs)
   document.addEventListener('touchmove', (e)=>{
     if(e.target.tagName === 'INPUT') return;
+    if(e.target.closest('#settingsSheet')) return;
     e.preventDefault();
   }, {passive:false});
 })();
