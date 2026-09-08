@@ -65,6 +65,27 @@
     letter-spacing: -0.01em;
     margin: 0;
     color: var(--ink);
+    transition: color 0.3s ease;
+    cursor: pointer;
+  }
+  body.darkChrome header h1 { color: #f0ece6; }
+  body.darkChrome #noteReadout { color: var(--accent); }
+
+  .logoLetter {
+    display: inline-block;
+    transition: color 0.15s ease, text-shadow 0.15s ease;
+  }
+  .logoLetter.litUp {
+    color: #ff5b3c;
+    text-shadow: 0 0 8px rgba(255,91,60,0.6);
+  }
+  h1.legacyLogo {
+    color: #e8e6e1 !important;
+    letter-spacing: 0.01em;
+  }
+  h1.legacyLogo .logoLetter {
+    color: #e8e6e1;
+    text-shadow: 0 0 6px rgba(255,91,60,0.25);
   }
   header .sub {
     font-size: 11px;
@@ -136,7 +157,7 @@
   #dock {
     flex: 0 0 auto;
     padding: 14px 12px max(14px, env(safe-area-inset-bottom)) 12px;
-    background: linear-gradient(180deg, #ffb35c 0%, #ff8a2e 45%, #ff7a1a 100%);
+    background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 45%, #ff7a1a 100%));
     border-radius: 24px 24px 0 0;
     margin-top: 10px;
   }
@@ -170,7 +191,7 @@
   button.action.danger:active { background: #fff0e2; }
 
   #settingsToggle {
-    width: 100%;
+    width: auto;
     background: #ffffff;
     border: none;
     color: var(--accent-deep);
@@ -195,6 +216,29 @@
   #settingsToggle .chev { transition: transform 0.25s ease; font-size: 10px; }
   #settingsToggle.open .chev { transform: rotate(180deg); }
 
+  #rankToggle {
+    background: #ffffff;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 0 rgba(150,70,10,0.25);
+    transform: translateY(0);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  #rankToggle:active {
+    background: #fff3e6;
+    transform: translateY(2px);
+    box-shadow: 0 0 0 rgba(150,70,10,0.25);
+  }
+
   /* ---------- Full-screen Customize overlay ---------- */
   #settingsOverlay {
     position: fixed;
@@ -215,7 +259,7 @@
   #settingsSheet {
     width: 100%;
     max-height: 88vh;
-    background: linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%);
+    background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
     border-radius: 28px 28px 0 0;
     padding: 18px 18px max(18px, env(safe-area-inset-bottom)) 18px;
     box-shadow: 0 -8px 40px rgba(74,54,38,0.3);
@@ -259,6 +303,164 @@
   #closeSettings:active {
     transform: scale(0.88);
     background: rgba(255,255,255,0.4);
+  }
+
+  /* ---------- Full-screen Rank Road overlay ---------- */
+  #rankOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(74,54,38,0);
+    pointer-events: none;
+    transition: background 0.32s ease;
+  }
+  #rankOverlay.open {
+    background: rgba(74,54,38,0.35);
+    pointer-events: auto;
+  }
+
+  #rankSheet {
+    width: 100%;
+    max-height: 88vh;
+    background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
+    border-radius: 28px 28px 0 0;
+    padding: 18px 18px max(18px, env(safe-area-inset-bottom)) 18px;
+    box-shadow: 0 -8px 40px rgba(74,54,38,0.3);
+    transform: translateY(100%) scale(0.96);
+    opacity: 0;
+    transition: transform 0.38s cubic-bezier(.2,.9,.25,1.1), opacity 0.28s ease;
+    overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  #rankOverlay.open #rankSheet {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+
+  #rankHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  #rankHeader h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+  }
+  #closeRank {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.25);
+    color: #ffffff;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  #closeRank:active {
+    transform: scale(0.88);
+    background: rgba(255,255,255,0.4);
+  }
+
+  #radioToggle {
+    background: #ffffff;
+    border: none;
+    color: var(--accent-deep);
+    border-radius: 999px;
+    padding: 11px;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 0 rgba(150,70,10,0.25);
+    transform: translateY(0);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  #radioToggle:active {
+    background: #fff3e6;
+    transform: translateY(2px);
+    box-shadow: 0 0 0 rgba(150,70,10,0.25);
+  }
+
+  /* ---------- Full-screen Radio overlay ---------- */
+  #radioOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: rgba(74,54,38,0);
+    pointer-events: none;
+    transition: background 0.32s ease;
+  }
+  #radioOverlay.open {
+    background: rgba(74,54,38,0.35);
+    pointer-events: auto;
+  }
+  #radioSheet {
+    width: 100%;
+    max-height: 88vh;
+    background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
+    border-radius: 28px 28px 0 0;
+    padding: 18px 18px max(18px, env(safe-area-inset-bottom)) 18px;
+    box-shadow: 0 -8px 40px rgba(74,54,38,0.3);
+    transform: translateY(100%) scale(0.96);
+    opacity: 0;
+    transition: transform 0.38s cubic-bezier(.2,.9,.25,1.1), opacity 0.28s ease;
+    overflow-y: auto;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+  #radioOverlay.open #radioSheet {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  #radioHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  #radioHeader h2 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 750;
+    letter-spacing: -0.01em;
+  }
+  #closeRadio {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.25);
+    color: #ffffff;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  #closeRadio:active {
+    transform: scale(0.88);
+    background: rgba(255,255,255,0.4);
+  }
+  #audioViz {
+    background: rgba(255,255,255,0.92);
+    border-radius: 16px;
+    padding: 10px;
   }
 
   .panelInner {
@@ -333,6 +535,21 @@
   .swatch[data-c="rainbow"] {
     background: conic-gradient(red, orange, yellow, lime, cyan, blue, violet, red);
   }
+  .swatch[data-c="gold"] { background: linear-gradient(135deg, #ffe066, #ffb700); }
+  .swatch[data-c="ember"] { background: linear-gradient(135deg, #ff7a3d, #d81e1e); }
+  .swatch[data-c="aurora"] { background: linear-gradient(135deg, #39ffbe, #2a7fff); }
+  .swatch[data-c="prism"] {
+    background: conic-gradient(#ff2fd0, #ffee00, #00e5ff, #ff2fd0);
+  }
+  .swatch.locked {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    filter: grayscale(1) brightness(0.85);
+    opacity: 0.75;
+  }
+  .swatch.locked.selected { border-color: transparent; }
 
   .segRow { display: flex; gap: 6px; }
   .segRow.wrap { flex-wrap: wrap; }
@@ -352,6 +569,12 @@
     background: var(--accent);
     color: #fff;
   }
+  .seg.locked {
+    opacity: 0.6;
+    background: #f0e4d8;
+    color: var(--ink-dim);
+  }
+  .seg.locked.selected { background: #f0e4d8; color: var(--ink-dim); }
 
   /* ---------- Boot warning screen ---------- */
   #bootWarning {
@@ -433,6 +656,76 @@
     background: #ffffff;
   }
 
+  #rankRoad {
+    background: rgba(255,255,255,0.92);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  #rankRoad h3 {
+    margin: 0 0 6px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  #rankRoad h3 .val {
+    font-size: 11px;
+    color: var(--ink-dim);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+  .rankNote {
+    font-size: 11.5px;
+    color: var(--ink-dim);
+    line-height: 1.5;
+    margin: 0 0 12px 0;
+  }
+  #rankBadge {
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    text-align: center;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+    padding: 10px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  #rankTierList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .tierRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #fdf1e6;
+  }
+  .tierRow.reached {
+    background: #fff0e0;
+    border: 1px solid var(--accent);
+  }
+  .tierRow.locked { opacity: 0.55; }
+  .tierDot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--ink-dim);
+    flex-shrink: 0;
+  }
+  .tierRow.reached .tierDot { background: var(--accent); }
+  .tierInfo { flex: 1; }
+  .tierInfo .tierName { font-size: 12.5px; font-weight: 700; color: var(--ink); }
+  .tierInfo .tierUnlock { font-size: 11px; color: var(--ink-dim); }
+  .tierMins { font-size: 11px; color: var(--ink-dim); font-weight: 600; white-space: nowrap; }
+
   #knownBugs {
     background: rgba(255,255,255,0.92);
     border-radius: 16px;
@@ -474,7 +767,7 @@
 
   <header>
     <div class="brand">
-      <h1>Wavefinger</h1>
+      <h1 id="logoText">Wavefinger</h1>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
       <div id="noteReadout"></div>
@@ -501,9 +794,17 @@
       <button class="action danger" id="clearBtn">Clear trails</button>
     </div>
 
-    <div id="settingsToggle">
-      <span>Customize</span>
-      <span class="chev">▾</span>
+    <div class="row">
+      <div id="settingsToggle" style="flex: 2;">
+        <span>Customize</span>
+        <span class="chev">▾</span>
+      </div>
+      <div id="rankToggle" style="flex: 1;">
+        <span>🏆 Rank</span>
+      </div>
+      <div id="radioToggle" style="flex: 1;">
+        <span>📻 Radio</span>
+      </div>
     </div>
   </div>
 
@@ -538,6 +839,10 @@
           <div class="swatch" data-c="pink"></div>
           <div class="swatch" data-c="white"></div>
           <div class="swatch" data-c="rainbow"></div>
+          <div class="swatch locked" data-c="gold" data-unlock="color">🔒</div>
+          <div class="swatch locked" data-c="ember" data-unlock="color">🔒</div>
+          <div class="swatch locked" data-c="aurora" data-unlock="color">🔒</div>
+          <div class="swatch locked" data-c="prism" data-unlock="color">🔒</div>
         </div>
       </div>
 
@@ -549,11 +854,11 @@
           <div class="seg" data-i="square">Square</div>
           <div class="seg" data-i="sawtooth">Saw</div>
           <div class="seg" data-i="pluck">Pluck</div>
-          <div class="seg" data-i="organ">Organ</div>
           <div class="seg" data-i="choir">Choir</div>
-          <div class="seg" data-i="bell">Bell</div>
           <div class="seg" data-i="wind">Wind</div>
           <div class="seg" data-i="arp8bit">8-Bit</div>
+          <div class="seg locked" data-i="bell" data-unlock="instrument">🔒 Bell</div>
+          <div class="seg locked" data-i="organ" data-unlock="instrument">🔒 Organ</div>
         </div>
       </div>
 
@@ -580,23 +885,37 @@
 
       <div class="field">
         <label>Background</label>
-        <div class="segRow" id="bgSeg">
+        <div class="segRow wrap" id="bgSeg">
           <div class="seg selected" data-bg="cream">Cream</div>
           <div class="seg" data-bg="paper">Paper</div>
           <div class="seg" data-bg="midnight">Midnight</div>
           <div class="seg" data-bg="slate">Slate</div>
+          <div class="seg locked" data-bg="sunset" data-unlock="bg">🔒 Sunset</div>
+          <div class="seg locked" data-bg="aurora" data-unlock="bg">🔒 Aurora</div>
+          <div class="seg locked" data-bg="prism" data-unlock="bg">🔒 Prism</div>
+          <div class="seg" id="legacySeg" data-bg="legacy" style="display:none;">Legacy</div>
         </div>
       </div>
 
       <div class="field">
-        <label>Effects</label>
-        <div class="toggleRow">
+        <label>Echo</label>
+        <div class="toggleRow" style="margin-bottom: 12px;">
           <button class="toggleBtn" id="echoToggle">
-            <span>Echo</span>
+            <span>Enabled</span>
             <span class="toggleDot"></span>
           </button>
+        </div>
+        <label style="margin-bottom: 6px;">Amount <span class="val" id="echoAmountVal">35%</span></label>
+        <input type="range" id="echoAmountSlider" min="0" max="100" step="1" value="35">
+        <label style="margin: 10px 0 6px;">Delay time <span class="val" id="echoTimeVal">280ms</span></label>
+        <input type="range" id="echoTimeSlider" min="80" max="800" step="10" value="280">
+      </div>
+
+      <div class="field">
+        <label>Sustain</label>
+        <div class="toggleRow">
           <button class="toggleBtn" id="sustainToggle">
-            <span>Sustain</span>
+            <span>Enabled</span>
             <span class="toggleDot"></span>
           </button>
         </div>
@@ -628,9 +947,87 @@
           <li>Sustain mode can leave notes ringing indefinitely — use "Clear trails" or "Mute" to stop all sound.</li>
           <li>Undo only stores the last 15 strokes and clears when you tap "Clear trails."</li>
           <li>Wind and Organ instruments are more CPU-intensive — may stutter on older devices with many fingers down at once.</li>
+          <li>Rank Road progress is saved only on this device/browser — clearing site data or switching devices resets it to zero.</li>
+          <li>Radio only works with a real audio file you upload — streaming links (YouTube/Spotify/TikTok) can't be played or analyzed from a webpage like this.</li>
+          <li>Beat detection is a simple bass-energy spike detector, not full music analysis — it works best with tracks that have a clear, punchy beat.</li>
+          <li>Theme colors apply to the header, dock, and panels, but a few smaller UI accents may still show the default orange in dark themes.</li>
+          <li>Slider pitch feedback plays a soft tone while dragging any Customize slider — if you don't want the noise, mute the app while adjusting settings.</li>
+          <li>The unlock code field in Rank Road accepts one secret code that unlocks everything at once — there's no hint for it in-app.</li>
         </ul>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<div id="rankOverlay">
+  <div id="rankSheet">
+    <div id="rankHeader">
+      <h2>Rank Road</h2>
+      <button id="closeRank" aria-label="Close">✕</button>
+    </div>
+
+    <div class="panelInner">
+      <div id="rankRoad">
+        <h3>Progress <span class="val" id="rankPlaytimeVal">0m played</span></h3>
+        <p class="rankNote">Tracked on this device only. Play time adds up while you're actively dragging on the pad. Higher ranks unlock exclusive trail colors, instruments, and grid backgrounds — nothing else changes.</p>
+        <div id="rankBadge">
+          <span id="rankBadgeName">Newcomer</span>
+        </div>
+        <div id="rankTierList"></div>
+      </div>
+
+      <div class="field">
+        <label>Have a code?</label>
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="unlockCodeInput" placeholder="Enter code" autocapitalize="off" autocorrect="off" spellcheck="false"
+            style="flex:1; border:none; border-radius:10px; padding:10px 12px; font-size:13px; background:#fff; color:var(--ink);">
+          <button class="action" id="unlockCodeBtn" style="flex: 0 0 auto; padding: 10px 16px;">Unlock</button>
+        </div>
+        <p class="rankNote" id="unlockCodeMsg" style="margin-top: 8px;"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="radioOverlay">
+  <div id="radioSheet">
+    <div id="radioHeader">
+      <h2>Radio</h2>
+      <button id="closeRadio" aria-label="Close">✕</button>
+    </div>
+
+    <div class="panelInner">
+      <div class="field">
+        <label>Play your own track</label>
+        <p class="rankNote">Upload an MP3 or other audio file from your device. The pad reacts live to its actual bass, mids, and beat — this only works with a real audio file, not streaming links (YouTube/Spotify/TikTok can't be analyzed this way from a webpage).</p>
+        <input type="file" id="audioFileInput" accept="audio/*" style="margin-top: 8px; font-size: 12px; color: var(--ink);">
+      </div>
+
+      <div class="field" id="nowPlayingField" style="display:none;">
+        <label>Now playing <span class="val" id="nowPlayingName"></span></label>
+        <div class="toggleRow" style="margin-bottom: 10px;">
+          <button class="toggleBtn selected" id="playPauseBtn"><span>⏸ Pause</span></button>
+          <button class="toggleBtn" id="stopRadioBtn"><span>⏹ Stop</span></button>
+        </div>
+        <label style="margin-bottom: 6px;">Volume <span class="val" id="radioVolVal">70%</span></label>
+        <input type="range" id="radioVolSlider" min="0" max="100" step="1" value="70">
+      </div>
+
+      <div class="field">
+        <label>React to music</label>
+        <div class="toggleRow">
+          <button class="toggleBtn selected" id="reactToggle">
+            <span>Enabled</span>
+            <span class="toggleDot"></span>
+          </button>
+        </div>
+        <p class="rankNote" style="margin-top: 10px;">When on and a track is playing: the grid pulses with the beat, particle bursts get more intense on bass hits, and the background subtly brightens with the music's energy.</p>
+      </div>
+
+      <div id="audioViz" style="display:none;">
+        <canvas id="audioVizCanvas" width="300" height="60" style="width:100%; height:60px; display:block; border-radius: 10px;"></canvas>
+      </div>
     </div>
   </div>
 </div>
@@ -671,6 +1068,8 @@
     lineThickness: 6,
     scale: 'chromatic',   // musical scale quantization
     echo: false,          // echo/delay effect
+    echoAmount: 35,       // 0-100, how much of the echo feeds back
+    echoTime: 280,        // delay time in ms
     sustain: false,       // hold notes after lifting finger
     particles: false,     // burst of particles on new touch — opt-in, off by default
     particleIntensity: 10,
@@ -678,28 +1077,327 @@
     bgTheme: 'cream'       // canvas background theme
   };
 
+  // ---------- Rank Road: play-time progression ----------
+  const RANK_TIERS = [
+    { minutes: 0,   name: 'Newcomer',   unlockColor: null,     unlockInstrument: null,   unlockBg: null },
+    { minutes: 5,   name: 'Doodler',    unlockColor: 'gold',   unlockInstrument: null,   unlockBg: null },
+    { minutes: 15,  name: 'Sketcher',   unlockColor: null,     unlockInstrument: 'bell', unlockBg: null },
+    { minutes: 30,  name: 'Composer',   unlockColor: 'ember',  unlockInstrument: null,   unlockBg: 'sunset' },
+    { minutes: 60,  name: 'Virtuoso',   unlockColor: null,     unlockInstrument: 'organ',unlockBg: null },
+    { minutes: 120, name: 'Maestro',    unlockColor: 'aurora', unlockInstrument: null,   unlockBg: 'aurora' },
+    { minutes: 240, name: 'Legend',     unlockColor: 'prism',  unlockInstrument: null,   unlockBg: 'prism' }
+  ];
+
+  const rankData = {
+    totalSeconds: 0
+  };
+
+  function loadRankData(){
+    try{
+      const saved = localStorage.getItem('wavefinger_playtime');
+      if(saved) rankData.totalSeconds = parseFloat(saved) || 0;
+    }catch(e){}
+  }
+  function saveRankData(){
+    try{ localStorage.setItem('wavefinger_playtime', String(rankData.totalSeconds)); }catch(e){}
+  }
+
+  function getCurrentTierIndex(){
+    const mins = rankData.totalSeconds / 60;
+    let idx = 0;
+    for(let i=0;i<RANK_TIERS.length;i++){
+      if(mins >= RANK_TIERS[i].minutes) idx = i;
+    }
+    return idx;
+  }
+
+  let masterUnlocked = false;
+
+  function isUnlocked(kind, value){
+    if(masterUnlocked) return true; // secret code unlocks everything, regardless of rank
+    // kind: 'color' | 'instrument' | 'bg'
+    const tierIdx = getCurrentTierIndex();
+    for(let i=0;i<=tierIdx;i++){
+      const tier = RANK_TIERS[i];
+      if(kind === 'color' && tier.unlockColor === value) return true;
+      if(kind === 'instrument' && tier.unlockInstrument === value) return true;
+      if(kind === 'bg' && tier.unlockBg === value) return true;
+    }
+    return false;
+  }
+
+  function loadMasterUnlock(){
+    try{ masterUnlocked = localStorage.getItem('wavefinger_master_unlocked') === '1'; }catch(e){}
+  }
+  function saveMasterUnlock(){
+    try{ localStorage.setItem('wavefinger_master_unlocked', '1'); }catch(e){}
+  }
+
+  const UNLOCK_CODE = 'wavefinger10'; // secret code — unlocks every theme and trail at once
+
+  function tryUnlockCode(code){
+    const normalized = code.trim().toLowerCase();
+    const msgEl = document.getElementById('unlockCodeMsg');
+    if(normalized === UNLOCK_CODE){
+      masterUnlocked = true;
+      legacyUnlocked = true;
+      saveMasterUnlock();
+      saveLegacyUnlock();
+      updateRankUI();
+      applyBgTheme();
+      if(msgEl){
+        msgEl.textContent = 'Unlocked! Every trail, instrument, and theme is now available.';
+        msgEl.style.color = '#2a7a3f';
+      }
+      return true;
+    } else {
+      if(msgEl){
+        msgEl.textContent = 'That code isn\'t right — try again.';
+        msgEl.style.color = '#c0392b';
+      }
+      return false;
+    }
+  }
+
+  // play-time ticking: accumulate only while a finger is actually down (actively playing)
+  let playTimeInterval = null;
+  function startPlayTimeTracking(){
+    if(playTimeInterval) return;
+    playTimeInterval = setInterval(()=>{
+      if(activePointerIds.size > 0){
+        rankData.totalSeconds += 1;
+        saveRankData();
+        updateRankUI();
+      }
+    }, 1000);
+  }
+
+  // ---------- Secret: tap the logo 10 times to unlock the legacy dark theme ----------
+  const LOGO_TEXT = 'Wavefinger'; // 10 letters — one tap reveals one more letter's worth of dark mode
+  let logoTapCount = 0;
+  let legacyUnlocked = false;
+
+  function loadLegacyUnlock(){
+    try{ legacyUnlocked = localStorage.getItem('wavefinger_legacy_unlocked') === '1'; }catch(e){}
+  }
+  function saveLegacyUnlock(){
+    try{ localStorage.setItem('wavefinger_legacy_unlocked', '1'); }catch(e){}
+  }
+
+  function setupLogo(){
+    const logoEl = document.getElementById('logoText');
+    if(!logoEl) return;
+    // wrap each letter in its own span so we can progressively style them
+    logoEl.innerHTML = LOGO_TEXT.split('').map((ch,i)=>`<span class="logoLetter" data-idx="${i}">${ch}</span>`).join('');
+
+    logoEl.addEventListener('click', ()=>{
+      // once a non-cream/legacy theme is active, tapping starts the reveal fresh from 0 again
+      if(state.bgTheme !== 'legacy'){
+        logoTapCount = Math.min(logoTapCount + 1, LOGO_TEXT.length);
+        renderLogoProgress();
+        if(logoTapCount >= LOGO_TEXT.length){
+          legacyUnlocked = true;
+          saveLegacyUnlock();
+          state.bgTheme = 'legacy';
+          applyBgTheme();
+          logoTapCount = 0;
+        }
+      }
+    });
+  }
+
+  function renderLogoProgress(){
+    const logoEl = document.getElementById('logoText');
+    if(!logoEl) return;
+    const letters = logoEl.querySelectorAll('.logoLetter');
+    letters.forEach((span, i)=>{
+      span.classList.toggle('litUp', i < logoTapCount);
+    });
+  }
+
+  function updateLogoForTheme(){
+    const logoEl = document.getElementById('logoText');
+    if(!logoEl) return;
+    if(state.bgTheme === 'legacy'){
+      logoEl.classList.add('legacyLogo');
+      logoTapCount = 0;
+      renderLogoProgress();
+    } else {
+      // reverting to any other theme resets the progressive reveal
+      logoEl.classList.remove('legacyLogo');
+      logoTapCount = 0;
+      renderLogoProgress();
+    }
+  }
+
+  function formatPlaytime(totalSeconds){
+    const mins = Math.floor(totalSeconds / 60);
+    if(mins < 60) return mins + 'm played';
+    const hrs = Math.floor(mins / 60);
+    const remMins = mins % 60;
+    return hrs + 'h ' + remMins + 'm played';
+  }
+
+  function updateRankUI(){
+    const tierIdx = getCurrentTierIndex();
+    const currentTier = RANK_TIERS[tierIdx];
+    const playtimeEl = document.getElementById('rankPlaytimeVal');
+    const badgeEl = document.getElementById('rankBadgeName');
+    if(playtimeEl) playtimeEl.textContent = formatPlaytime(rankData.totalSeconds);
+    if(badgeEl) badgeEl.textContent = currentTier.name;
+
+    // render tier list
+    const listEl = document.getElementById('rankTierList');
+    if(listEl){
+      listEl.innerHTML = RANK_TIERS.map((tier, i)=>{
+        const reached = i <= tierIdx;
+        const unlocks = [];
+        if(tier.unlockColor) unlocks.push(tier.unlockColor + ' trail');
+        if(tier.unlockInstrument) unlocks.push(tier.unlockInstrument + ' instrument');
+        if(tier.unlockBg) unlocks.push(tier.unlockBg + ' background');
+        const unlockText = unlocks.length ? unlocks.join(', ') : '—';
+        return `<div class="tierRow ${reached ? 'reached' : 'locked'}">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">${tier.name}</div>
+            <div class="tierUnlock">${unlockText}</div>
+          </div>
+          <div class="tierMins">${tier.minutes}m</div>
+        </div>`;
+      }).join('');
+    }
+
+    // unlock/lock swatches and segs live
+    document.querySelectorAll('[data-unlock="color"]').forEach(el=>{
+      const unlocked = isUnlocked('color', el.dataset.c);
+      el.classList.toggle('locked', !unlocked);
+      if(unlocked) el.textContent = '';
+    });
+    document.querySelectorAll('[data-unlock="instrument"]').forEach(el=>{
+      const unlocked = isUnlocked('instrument', el.dataset.i);
+      el.classList.toggle('locked', !unlocked);
+      if(unlocked){
+        const names = { bell: 'Bell', organ: 'Organ' };
+        el.textContent = names[el.dataset.i] || el.dataset.i;
+      }
+    });
+    document.querySelectorAll('[data-unlock="bg"]').forEach(el=>{
+      const unlocked = isUnlocked('bg', el.dataset.bg);
+      el.classList.toggle('locked', !unlocked);
+      if(unlocked){
+        const names = { sunset: 'Sunset', aurora: 'Aurora', prism: 'Prism' };
+        el.textContent = names[el.dataset.bg] || el.dataset.bg;
+      }
+    });
+  }
+
+
   const colorHex = {
     orange: '#ff5b3c',
     cyan: '#34e0d6',
     violet: '#9b6bff',
     lime: '#b6ff3c',
     pink: '#ff5ba0',
-    white: '#f2f2f2'
+    white: '#f2f2f2',
+    gold: '#ffd23f',
+    ember: '#ff3d1a',
+    aurora: '#39ffbe'
+    // prism handled specially in colorForStroke — it's a cycling gradient, not a fixed hex
   };
 
   const bgThemes = {
-    cream:     '#fdfaf6',
-    midnight:  '#12141c',
-    paper:     '#f5f0e6',
-    slate:     '#1e2530'
+    cream: '#fdfaf6',
+
+    paper: `
+      repeating-linear-gradient(0deg, rgba(160,130,90,0.035) 0px, rgba(160,130,90,0.035) 1px, transparent 1px, transparent 3px),
+      repeating-linear-gradient(90deg, rgba(160,130,90,0.02) 0px, rgba(160,130,90,0.02) 1px, transparent 1px, transparent 4px),
+      radial-gradient(ellipse at 20% 10%, rgba(200,170,120,0.08), transparent 60%),
+      #f6efe0
+    `,
+
+    midnight: `
+      radial-gradient(1.5px 1.5px at 8% 15%, #fff, transparent),
+      radial-gradient(1px 1px at 22% 8%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 35% 25%, #cbd5ff, transparent),
+      radial-gradient(1px 1px at 48% 12%, #fff, transparent),
+      radial-gradient(2px 2px at 62% 30%, #fff, transparent),
+      radial-gradient(1px 1px at 75% 18%, #cbd5ff, transparent),
+      radial-gradient(1.5px 1.5px at 88% 40%, #fff, transparent),
+      radial-gradient(1px 1px at 15% 55%, #fff, transparent),
+      radial-gradient(1.5px 1.5px at 92% 70%, #fff, transparent),
+      radial-gradient(1px 1px at 40% 80%, #cbd5ff, transparent),
+      radial-gradient(1.5px 1.5px at 68% 85%, #fff, transparent),
+      linear-gradient(180deg, #090a12 0%, #12141f 55%, #181b2a 100%)
+    `,
+
+    slate: `
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 2px, transparent 2px, transparent 6px),
+      radial-gradient(ellipse at 70% 80%, rgba(90,110,140,0.15), transparent 60%),
+      linear-gradient(160deg, #232b38 0%, #1a212c 60%, #151a22 100%)
+    `,
+
+    sunset: `
+      radial-gradient(ellipse 120% 60% at 50% 100%, rgba(255,140,60,0.35), transparent 70%),
+      linear-gradient(180deg, #fff1d6 0%, #ffd9a0 35%, #ffab6b 65%, #ff8654 100%)
+    `,
+
+    aurora: `
+      radial-gradient(ellipse 80% 40% at 30% 20%, rgba(57,255,190,0.22), transparent 65%),
+      radial-gradient(ellipse 70% 35% at 70% 45%, rgba(122,92,255,0.20), transparent 65%),
+      radial-gradient(ellipse 60% 30% at 45% 70%, rgba(42,180,255,0.16), transparent 65%),
+      linear-gradient(180deg, #060b14 0%, #0b1826 50%, #0a1420 100%)
+    `,
+
+    prism: `
+      conic-gradient(from 200deg at 30% 30%, rgba(255,47,208,0.18), transparent 30%),
+      conic-gradient(from 20deg at 75% 60%, rgba(0,229,255,0.18), transparent 30%),
+      conic-gradient(from 100deg at 55% 85%, rgba(255,238,0,0.14), transparent 30%),
+      linear-gradient(160deg, #1a0d2e 0%, #2d1b4e 45%, #3d1a3a 75%, #1a0d2e 100%)
+    `,
+
+    legacy: `
+      radial-gradient(ellipse at 50% 0%, rgba(255,91,60,0.06), transparent 60%),
+      #0a0a0c
+    `
   };
+
+  // UI chrome palettes — page background + dock/sheet gradient per theme.
+  // Each theme gets its own dock gradient so the whole app feels consistent, not just the pad.
+  const uiPalettes = {
+    cream:    { pageBg: '#ffffff', dockGradient: 'linear-gradient(180deg, #ffb35c 0%, #ff8a2e 45%, #ff7a1a 100%)' },
+    paper:    { pageBg: '#f9f3e6', dockGradient: 'linear-gradient(180deg, #e8c896 0%, #cf9f5c 45%, #b9843f 100%)' },
+    midnight: { pageBg: '#0c0e16', dockGradient: 'linear-gradient(180deg, #3a4470 0%, #262d52 45%, #171c38 100%)' },
+    slate:    { pageBg: '#141a22', dockGradient: 'linear-gradient(180deg, #4a5a70 0%, #35424f 45%, #232c36 100%)' },
+    sunset:   { pageBg: '#fff6e8', dockGradient: 'linear-gradient(180deg, #ffb37a 0%, #ff8a5a 45%, #ff6b45 100%)' },
+    aurora:   { pageBg: '#05080f', dockGradient: 'linear-gradient(180deg, #2ad6a8 0%, #2a7fff 45%, #6a4fd6 100%)' },
+    prism:    { pageBg: '#160a26', dockGradient: 'linear-gradient(180deg, #ff2fd0 0%, #6a2fd6 45%, #2fb8ff 100%)' },
+    legacy:   { pageBg: '#0a0a0c', dockGradient: 'linear-gradient(180deg, #232328 0%, #17171a 45%, #0a0a0c 100%)' }
+  };
+
   function applyBgTheme(){
-    const hex = bgThemes[state.bgTheme] || bgThemes.cream;
-    wrap.style.setProperty('--canvas-bg', hex);
-    // dark themes need brighter grid lines so they stay visible
-    const isDark = (state.bgTheme === 'midnight' || state.bgTheme === 'slate');
+    const bg = bgThemes[state.bgTheme] || bgThemes.cream;
+    wrap.style.setProperty('--canvas-bg', bg);
+    // dark/exclusive themes need brighter grid lines so they stay visible
+    const isDark = ['midnight','slate','aurora','prism','legacy'].includes(state.bgTheme);
     document.documentElement.style.setProperty('--grid-line', isDark ? 'rgba(255,255,255,0.10)' : 'rgba(74,54,38,0.06)');
     document.documentElement.style.setProperty('--grid-line-strong', isDark ? 'rgba(255,255,255,0.20)' : 'rgba(74,54,38,0.13)');
+
+    // apply matching UI chrome (page background + dock/sheet gradient) for the whole app
+    const palette = uiPalettes[state.bgTheme] || uiPalettes.cream;
+    document.documentElement.style.setProperty('--bg', palette.pageBg);
+    document.documentElement.style.setProperty('--dock-gradient', palette.dockGradient);
+    document.body.style.background = palette.pageBg;
+    document.body.classList.toggle('darkChrome', isDark);
+
+    updateLogoForTheme();
+
+    // reveal the Legacy option once unlocked, and keep the seg row's visual selection in sync
+    const legacySeg = document.getElementById('legacySeg');
+    if(legacySeg) legacySeg.style.display = legacyUnlocked ? '' : 'none';
+    document.querySelectorAll('#bgSeg .seg').forEach(s=>{
+      s.classList.toggle('selected', s.dataset.bg === state.bgTheme);
+    });
+
     drawGrid();
   }
 
@@ -739,6 +1437,20 @@
   let master = null;
   let delayNode = null;
   let delayFeedback = null;
+  let echoSend = null;
+
+  // ---------- Radio: user-uploaded track with live audio analysis ----------
+  let radioAudioEl = null;
+  let radioSource = null;
+  let radioAnalyser = null;
+  let radioGain = null;
+  let radioFreqData = null;
+  let radioBassEnergy = 0;
+  let radioMidEnergy = 0;
+  let radioTrebleEnergy = 0;
+  let radioBeatDetected = false;
+  let radioBeatHistory = [];
+  let radioReactEnabled = true;
   const voices = new Map(); // pointerId -> {osc, gain, filter?}
 
   function ensureAudio(){
@@ -747,17 +1459,21 @@
       master = actx.createGain();
       master.gain.value = 0.9;
 
-      // echo/delay send, toggled on/off via feedback gain
+      // echo/delay send chain — echoSend controls whether ANY signal reaches the delay at all
       delayNode = actx.createDelay(1.0);
       delayNode.delayTime.value = 0.28;
       delayFeedback = actx.createGain();
-      delayFeedback.gain.value = 0; // 0 = off, set to ~0.35 when echo enabled
+      delayFeedback.gain.value = 0; // repeats feedback amount, set when echo is on
+      echoSend = actx.createGain();
+      echoSend.gain.value = 0; // 0 = fully off, no signal reaches the delay line at all
+
+      master.connect(echoSend);
+      echoSend.connect(delayNode);
       delayNode.connect(delayFeedback);
       delayFeedback.connect(delayNode);
+      delayNode.connect(actx.destination);
 
       master.connect(actx.destination);
-      master.connect(delayNode);
-      delayNode.connect(actx.destination);
     }
     if(actx.state === 'suspended') return actx.resume();
     return Promise.resolve();
@@ -765,7 +1481,16 @@
 
   function setEcho(on){
     state.echo = on;
-    if(delayFeedback) delayFeedback.gain.setTargetAtTime(on ? 0.35 : 0, actx.currentTime, 0.05);
+    if(echoSend) echoSend.gain.setTargetAtTime(on ? 0.5 : 0, actx.currentTime, 0.05);
+    if(delayFeedback) delayFeedback.gain.setTargetAtTime(on ? state.echoAmount/100 * 0.6 : 0, actx.currentTime, 0.05);
+  }
+  function setEchoAmount(amount){
+    state.echoAmount = amount;
+    if(delayFeedback && state.echo) delayFeedback.gain.setTargetAtTime(amount/100 * 0.6, actx.currentTime, 0.05);
+  }
+  function setEchoTime(ms){
+    state.echoTime = ms;
+    if(delayNode) delayNode.delayTime.setTargetAtTime(ms/1000, actx.currentTime, 0.05);
   }
 
   // iOS sometimes needs an actual sound played (not just resume()) to fully unlock audio.
@@ -782,7 +1507,7 @@
 
   // short synthesized UI click, like a physical button press
   let lastClickTime = 0;
-  function playClick(down){
+  function playClick(down, intensity){
     const now = performance.now();
     if(now - lastClickTime < 40) return; // debounce rapid double-fires
     lastClickTime = now;
@@ -790,16 +1515,85 @@
       const t = actx.currentTime;
       const osc = actx.createOscillator();
       const g = actx.createGain();
-      osc.type = 'square';
-      osc.frequency.value = down ? 900 : 1400;
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
-      osc.connect(g);
-      g.connect(actx.destination);
-      osc.start(t);
-      osc.stop(t + 0.05);
+
+      if(intensity === 'subtle'){
+        // softer, quieter, shorter — for frequent/minor UI (swatches, segs, sliders, toggles)
+        osc.type = 'sine';
+        osc.frequency.value = down ? 720 : 1000;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.07, t + 0.003);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+        osc.connect(g);
+        g.connect(actx.destination);
+        osc.start(t);
+        osc.stop(t + 0.03);
+      } else {
+        // punchy — for major actions (Clear, Undo, Mute, opening panels)
+        osc.type = 'square';
+        osc.frequency.value = down ? 900 : 1400;
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(0.18, t + 0.004);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + 0.045);
+        osc.connect(g);
+        g.connect(actx.destination);
+        osc.start(t);
+        osc.stop(t + 0.05);
+      }
     });
+  }
+
+  // ---------- Slider pitch feedback ----------
+  // While dragging any settings slider, play a soft sustained tone whose pitch
+  // tracks the slider's position (low value = low pitch, high value = high pitch).
+  let sliderToneOsc = null;
+  let sliderToneGain = null;
+  let sliderToneTimeout = null;
+
+  function startSliderTone(){
+    ensureAudio().then(()=>{
+      if(sliderToneOsc) return; // already sustaining
+      sliderToneOsc = actx.createOscillator();
+      sliderToneGain = actx.createGain();
+      sliderToneOsc.type = 'sine';
+      sliderToneGain.gain.value = 0;
+      sliderToneOsc.connect(sliderToneGain);
+      sliderToneGain.connect(actx.destination);
+      sliderToneOsc.start();
+      sliderToneGain.gain.setTargetAtTime(0.06, actx.currentTime, 0.02);
+    });
+  }
+
+  function updateSliderTone(fraction){
+    // fraction: 0 (slider min) to 1 (slider max)
+    if(!sliderToneOsc) return;
+    const freq = 220 + fraction * 880; // low A up to high A-ish, two octaves of range
+    sliderToneOsc.frequency.setTargetAtTime(freq, actx.currentTime, 0.03);
+    // reset the auto-stop timer every time the slider moves
+    if(sliderToneTimeout) clearTimeout(sliderToneTimeout);
+    sliderToneTimeout = setTimeout(stopSliderTone, 220);
+  }
+
+  function stopSliderTone(){
+    if(!sliderToneOsc) return;
+    const osc = sliderToneOsc, g = sliderToneGain;
+    sliderToneOsc = null; sliderToneGain = null;
+    const now = actx.currentTime;
+    g.gain.setTargetAtTime(0.0001, now, 0.05);
+    setTimeout(()=>{ try{ osc.stop(); osc.disconnect(); g.disconnect(); }catch(e){} }, 200);
+  }
+
+  // Attaches live pitch feedback to a range input. Call once per slider.
+  function attachSliderTone(inputEl){
+    inputEl.addEventListener('input', ()=>{
+      const min = parseFloat(inputEl.min);
+      const max = parseFloat(inputEl.max);
+      const val = parseFloat(inputEl.value);
+      const fraction = max > min ? (val - min) / (max - min) : 0;
+      startSliderTone();
+      updateSliderTone(fraction);
+    });
+    inputEl.addEventListener('touchend', stopSliderTone);
+    inputEl.addEventListener('change', stopSliderTone);
   }
 
   const SCALES = {
@@ -1005,6 +1799,11 @@
       hue = (hue + 2) % 360;
       return `hsl(${hue}, 90%, 62%)`;
     }
+    if(state.color === 'prism'){
+      // faster, more saturated cycling than rainbow — exclusive Legend-tier reward
+      hue = (hue + 5) % 360;
+      return `hsl(${hue}, 100%, 68%)`;
+    }
     return colorHex[state.color];
   }
 
@@ -1193,6 +1992,116 @@
     noteReadout.classList.remove('active');
   }
 
+  // ---------- Radio engine ----------
+  function loadRadioTrack(file){
+    ensureAudio();
+    if(radioAudioEl){
+      radioAudioEl.pause();
+      radioAudioEl.src = '';
+    }
+    const url = URL.createObjectURL(file);
+    radioAudioEl = new Audio(url);
+    radioAudioEl.loop = true;
+    radioAudioEl.volume = 0.7;
+
+    // build the analysis graph once
+    if(!radioAnalyser){
+      radioSource = actx.createMediaElementSource(radioAudioEl);
+      radioAnalyser = actx.createAnalyser();
+      radioAnalyser.fftSize = 256;
+      radioAnalyser.smoothingTimeConstant = 0.8;
+      radioGain = actx.createGain();
+      radioGain.gain.value = 0.7;
+      radioSource.connect(radioAnalyser);
+      radioAnalyser.connect(radioGain);
+      radioGain.connect(actx.destination);
+      radioFreqData = new Uint8Array(radioAnalyser.frequencyBinCount);
+    } else {
+      // re-hook a new source for a new file
+      radioSource = actx.createMediaElementSource(radioAudioEl);
+      radioSource.connect(radioAnalyser);
+    }
+
+    radioAudioEl.play().catch(()=>{});
+    document.getElementById('nowPlayingName').textContent = file.name;
+    document.getElementById('nowPlayingField').style.display = 'block';
+    document.getElementById('audioViz').style.display = 'block';
+    document.getElementById('playPauseBtn').classList.add('selected');
+    document.getElementById('playPauseBtn').querySelector('span').textContent = '⏸ Pause';
+  }
+
+  function stopRadioTrack(){
+    if(radioAudioEl){
+      radioAudioEl.pause();
+      radioAudioEl.currentTime = 0;
+    }
+    document.getElementById('nowPlayingField').style.display = 'none';
+    document.getElementById('audioViz').style.display = 'none';
+  }
+
+  function analyzeRadioFrame(){
+    if(radioAnalyser && radioAudioEl && !radioAudioEl.paused){
+      radioAnalyser.getByteFrequencyData(radioFreqData);
+      const len = radioFreqData.length;
+      const bassEnd = Math.floor(len * 0.12);
+      const midEnd = Math.floor(len * 0.5);
+
+      let bassSum = 0, midSum = 0, trebleSum = 0;
+      for(let i=0;i<bassEnd;i++) bassSum += radioFreqData[i];
+      for(let i=bassEnd;i<midEnd;i++) midSum += radioFreqData[i];
+      for(let i=midEnd;i<len;i++) trebleSum += radioFreqData[i];
+
+      radioBassEnergy = bassSum / bassEnd / 255;
+      radioMidEnergy = midSum / (midEnd - bassEnd) / 255;
+      radioTrebleEnergy = trebleSum / (len - midEnd) / 255;
+
+      // simple beat detection: bass energy spikes above its recent rolling average
+      radioBeatHistory.push(radioBassEnergy);
+      if(radioBeatHistory.length > 30) radioBeatHistory.shift();
+      const avg = radioBeatHistory.reduce((a,b)=>a+b,0) / radioBeatHistory.length;
+      radioBeatDetected = radioBassEnergy > avg * 135/100 + 0.15 && radioBassEnergy > 0.35;
+
+      if(radioReactEnabled) applyMusicReaction();
+      drawAudioViz();
+    }
+    requestAnimationFrame(analyzeRadioFrame);
+  }
+
+  function applyMusicReaction(){
+    // background brightness pulses gently with overall energy
+    const energy = (radioBassEnergy + radioMidEnergy + radioTrebleEnergy) / 3;
+    wrap.style.filter = `brightness(${1 + energy*0.12})`;
+
+    // beat hits trigger a burst in the middle of the pad, sized by bass energy
+    if(radioBeatDetected && state.particles){
+      const cx = W/2 + (Math.random()-0.5)*W*0.3;
+      const cy = H/2 + (Math.random()-0.5)*H*0.3;
+      const boostedIntensity = Math.min(30, state.particleIntensity + Math.floor(radioBassEnergy*15));
+      const savedIntensity = state.particleIntensity;
+      state.particleIntensity = boostedIntensity;
+      spawnBurst(cx, cy, colorForStroke(null, 0.5));
+      state.particleIntensity = savedIntensity;
+    }
+  }
+
+  function drawAudioViz(){
+    const vc = document.getElementById('audioVizCanvas');
+    if(!vc || vc.offsetParent === null) return; // skip if hidden
+    const vctx = vc.getContext('2d');
+    vctx.clearRect(0,0,vc.width,vc.height);
+    vctx.fillStyle = '#fdf1e6';
+    vctx.fillRect(0,0,vc.width,vc.height);
+    const barCount = 32;
+    const step = Math.floor(radioFreqData.length / barCount);
+    const barW = vc.width / barCount;
+    for(let i=0;i<barCount;i++){
+      const v = radioFreqData[i*step] / 255;
+      const barH = v * vc.height;
+      vctx.fillStyle = '#ff7a1a';
+      vctx.fillRect(i*barW + 1, vc.height - barH, barW - 2, barH);
+    }
+  }
+
   canvas.addEventListener('pointerdown', onPointerDown);
   canvas.addEventListener('pointermove', onPointerMove);
   canvas.addEventListener('pointerup', onPointerUp);
@@ -1210,11 +2119,19 @@
   });
 
   // ---------- Controls ----------
+  // Subtle click: frequent/minor UI — swatches, segmented options, toggle pills.
+  // Punchy click: major actions — Undo/Mute/Clear, and opening Customize/Rank/Radio panels.
+  function clickIntensityFor(target){
+    if(target.closest('.swatch, .seg, .toggleBtn')) return 'subtle';
+    return 'normal';
+  }
   document.addEventListener('pointerdown', (e)=>{
-    if(e.target.closest('button, .swatch, .seg, #settingsToggle')) playClick(true);
+    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
+    if(el) playClick(true, clickIntensityFor(el));
   });
   document.addEventListener('pointerup', (e)=>{
-    if(e.target.closest('button, .swatch, .seg, #settingsToggle')) playClick(false);
+    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
+    if(el) playClick(false, clickIntensityFor(el));
   });
 
   document.getElementById('clearBtn').addEventListener('click', ()=>{
@@ -1258,6 +2175,88 @@
     if(e.target === settingsOverlay) closeSettingsPanel();
   });
 
+  const rankToggle = document.getElementById('rankToggle');
+  const rankOverlay = document.getElementById('rankOverlay');
+  const closeRank = document.getElementById('closeRank');
+
+  function openRank(){
+    rankOverlay.classList.add('open');
+    updateRankUI();
+  }
+  function closeRankPanel(){
+    rankOverlay.classList.remove('open');
+  }
+  rankToggle.addEventListener('click', openRank);
+  closeRank.addEventListener('click', closeRankPanel);
+  rankOverlay.addEventListener('click', (e)=>{
+    if(e.target === rankOverlay) closeRankPanel();
+  });
+
+  const unlockCodeInput = document.getElementById('unlockCodeInput');
+  const unlockCodeBtn = document.getElementById('unlockCodeBtn');
+  unlockCodeBtn.addEventListener('click', ()=>{
+    tryUnlockCode(unlockCodeInput.value);
+    unlockCodeInput.value = '';
+  });
+  unlockCodeInput.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      tryUnlockCode(unlockCodeInput.value);
+      unlockCodeInput.value = '';
+    }
+  });
+
+  const radioToggle = document.getElementById('radioToggle');
+  const radioOverlay = document.getElementById('radioOverlay');
+  const closeRadio = document.getElementById('closeRadio');
+
+  function openRadio(){
+    radioOverlay.classList.add('open');
+  }
+  function closeRadioPanel(){
+    radioOverlay.classList.remove('open');
+  }
+  radioToggle.addEventListener('click', openRadio);
+  closeRadio.addEventListener('click', closeRadioPanel);
+  radioOverlay.addEventListener('click', (e)=>{
+    if(e.target === radioOverlay) closeRadioPanel();
+  });
+
+  document.getElementById('audioFileInput').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(file) loadRadioTrack(file);
+  });
+
+  const playPauseBtn = document.getElementById('playPauseBtn');
+  playPauseBtn.addEventListener('click', ()=>{
+    if(!radioAudioEl) return;
+    if(radioAudioEl.paused){
+      radioAudioEl.play().catch(()=>{});
+      playPauseBtn.classList.add('selected');
+      playPauseBtn.querySelector('span').textContent = '⏸ Pause';
+    } else {
+      radioAudioEl.pause();
+      playPauseBtn.classList.remove('selected');
+      playPauseBtn.querySelector('span').textContent = '▶ Play';
+    }
+  });
+
+  document.getElementById('stopRadioBtn').addEventListener('click', stopRadioTrack);
+
+  const radioVolSlider = document.getElementById('radioVolSlider');
+  const radioVolVal = document.getElementById('radioVolVal');
+  radioVolSlider.addEventListener('input', ()=>{
+    const v = parseInt(radioVolSlider.value, 10);
+    radioVolVal.textContent = v + '%';
+    if(radioAudioEl) radioAudioEl.volume = v/100;
+  });
+
+  const reactToggle = document.getElementById('reactToggle');
+  reactToggle.addEventListener('click', ()=>{
+    radioReactEnabled = !reactToggle.classList.contains('selected');
+    reactToggle.classList.toggle('selected', radioReactEnabled);
+    if(!radioReactEnabled) wrap.style.filter = '';
+  });
+
   const gridSlider = document.getElementById('gridSlider');
   function applyGridSize(){
     state.gridCols = parseInt(gridSlider.value,10);
@@ -1280,6 +2279,7 @@
   document.getElementById('colorSwatches').addEventListener('click', (e)=>{
     const sw = e.target.closest('.swatch');
     if(!sw) return;
+    if(sw.classList.contains('locked')){ playClick(true); return; } // locked: just a click sound, no selection
     document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
     sw.classList.add('selected');
     sw.classList.remove('justSelected'); void sw.offsetWidth; sw.classList.add('justSelected');
@@ -1287,10 +2287,11 @@
   });
 
   const instrumentLabel = document.getElementById('instrumentLabel');
-  const instNames = {sine:'Sine', triangle:'Triangle', square:'Square', sawtooth:'Saw', pluck:'Pluck'};
+  const instNames = {sine:'Sine', triangle:'Triangle', square:'Square', sawtooth:'Saw', pluck:'Pluck', choir:'Choir', wind:'Wind', arp8bit:'8-Bit', bell:'Bell', organ:'Organ'};
   document.getElementById('instrumentSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
     if(!seg) return;
+    if(seg.classList.contains('locked')){ playClick(true); return; }
     document.querySelectorAll('#instrumentSeg .seg').forEach(s=>s.classList.remove('selected'));
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
@@ -1319,6 +2320,7 @@
   document.getElementById('bgSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
     if(!seg) return;
+    if(seg.classList.contains('locked')){ playClick(true); return; }
     document.querySelectorAll('#bgSeg .seg').forEach(s=>s.classList.remove('selected'));
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
@@ -1332,6 +2334,28 @@
     echoToggle.classList.toggle('selected', on);
     ensureAudio().then(()=> setEcho(on));
   });
+
+  const echoAmountSlider = document.getElementById('echoAmountSlider');
+  const echoAmountVal = document.getElementById('echoAmountVal');
+  function applyEchoAmount(){
+    const v = parseInt(echoAmountSlider.value, 10);
+    echoAmountVal.textContent = v + '%';
+    ensureAudio().then(()=> setEchoAmount(v));
+  }
+  echoAmountSlider.addEventListener('input', applyEchoAmount);
+  echoAmountSlider.addEventListener('change', applyEchoAmount);
+  echoAmountSlider.addEventListener('touchend', applyEchoAmount);
+
+  const echoTimeSlider = document.getElementById('echoTimeSlider');
+  const echoTimeVal = document.getElementById('echoTimeVal');
+  function applyEchoTime(){
+    const v = parseInt(echoTimeSlider.value, 10);
+    echoTimeVal.textContent = v + 'ms';
+    ensureAudio().then(()=> setEchoTime(v));
+  }
+  echoTimeSlider.addEventListener('input', applyEchoTime);
+  echoTimeSlider.addEventListener('change', applyEchoTime);
+  echoTimeSlider.addEventListener('touchend', applyEchoTime);
 
   const sustainToggle = document.getElementById('sustainToggle');
   sustainToggle.addEventListener('click', ()=>{
@@ -1375,9 +2399,17 @@
 
   // ---------- Init ----------
   resize();
+  loadLegacyUnlock();
+  loadMasterUnlock();
+  setupLogo();
   applyBgTheme();
+  loadRankData();
+  updateRankUI();
+  startPlayTimeTracking();
+  document.querySelectorAll('input[type="range"]').forEach(attachSliderTone);
   requestAnimationFrame(resize);
   requestAnimationFrame(particleLoop);
+  requestAnimationFrame(analyzeRadioFrame);
   setTimeout(resize, 60);
   setTimeout(resize, 300);
   if(window.ResizeObserver){
@@ -1405,10 +2437,12 @@
     requestAnimationFrame(animateIdle);
   }
 
-  // prevent iOS bounce/scroll (but allow scrolling inside the Customize sheet, and range inputs)
+  // prevent iOS bounce/scroll (but allow scrolling inside the Customize, Rank Road, and Radio sheets, and range inputs)
   document.addEventListener('touchmove', (e)=>{
     if(e.target.tagName === 'INPUT') return;
     if(e.target.closest('#settingsSheet')) return;
+    if(e.target.closest('#rankSheet')) return;
+    if(e.target.closest('#radioSheet')) return;
     e.preventDefault();
   }, {passive:false});
 })();
