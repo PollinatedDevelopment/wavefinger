@@ -44,6 +44,16 @@
     height: 100vh;
     height: 100dvh;
     width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 521px) {
+    html, body { background: #e8e2d8; }
+    #app {
+      box-shadow: 0 0 60px rgba(0,0,0,0.15);
+      background: var(--bg);
+    }
   }
 
   /* ---------- Header ---------- */
@@ -59,6 +69,14 @@
     align-items: baseline;
     gap: 8px;
   }
+  #versionBadge {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-dim);
+    opacity: 0.65;
+    letter-spacing: 0.02em;
+  }
+  body.darkChrome #versionBadge { color: #a89f95; }
   header h1 {
     font-size: 16px;
     font-weight: 650;
@@ -97,6 +115,13 @@
     border: none;
     border-radius: 999px;
   }
+  @keyframes badgeBounce {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.15); }
+    70%  { transform: scale(0.96); }
+    100% { transform: scale(1); }
+  }
+  .badgeBounce { animation: badgeBounce 0.35s cubic-bezier(.3,1.6,.4,1); }
   #noteReadout {
     font-size: 11px;
     color: var(--accent);
@@ -109,17 +134,71 @@
   #noteReadout.active { opacity: 1; }
 
   /* ---------- Canvas area ---------- */
+  #canvasStage {
+    flex: 1 1 auto;
+    display: flex;
+    margin: 0 12px;
+    transform-origin: center center;
+    transition: filter 0.1s ease, transform 0.08s ease;
+  }
   #canvasWrap {
     flex: 1 1 auto;
     position: relative;
-    margin: 0 12px;
     border-radius: 20px;
     overflow: hidden;
     border: none;
     background: var(--canvas-bg, #fdfaf6);
+    background-size: var(--canvas-bg-size, 100% 100%);
+    background-position: var(--canvas-bg-pos, 0% 0%);
     box-shadow: 0 2px 14px var(--shadow-soft);
   }
   canvas { display: block; width: 100%; height: 100%; }
+  #reactiveLayer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Animated rank-tier backgrounds — each exclusive theme actually moves */
+  #canvasWrap.animBg-aurora {
+    background-size: 220% 220%;
+    animation: auroraDrift 18s ease-in-out infinite;
+  }
+  @keyframes auroraDrift {
+    0%   { background-position: 20% 30%; }
+    33%  { background-position: 70% 60%; }
+    66%  { background-position: 40% 80%; }
+    100% { background-position: 20% 30%; }
+  }
+
+  #canvasWrap.animBg-prism {
+    background-size: 260% 260%;
+    animation: prismSwirl 14s linear infinite;
+  }
+  @keyframes prismSwirl {
+    0%   { background-position: 0% 50%; filter: hue-rotate(0deg); }
+    50%  { background-position: 100% 50%; filter: hue-rotate(25deg); }
+    100% { background-position: 0% 50%; filter: hue-rotate(0deg); }
+  }
+
+  #canvasWrap.animBg-legacy {
+    background-size: 180% 180%;
+    animation: legacyPulse 5s ease-in-out infinite;
+  }
+  @keyframes legacyPulse {
+    0%, 100% { background-position: 50% 0%; }
+    50%      { background-position: 50% 100%; }
+  }
+
+  #canvasWrap.animBg-sunset {
+    background-size: 160% 160%;
+    animation: sunsetGlow 12s ease-in-out infinite;
+  }
+  @keyframes sunsetGlow {
+    0%, 100% { background-position: 50% 100%; }
+    50%      { background-position: 50% 70%; }
+  }
 
   #hint {
     position: absolute;
@@ -181,6 +260,8 @@
     box-shadow: 0 2px 0 rgba(150,70,10,0.25);
     transform: translateY(0);
     transition: transform 0.08s ease, box-shadow 0.08s ease;
+    position: relative;
+    overflow: hidden;
   }
   button.action:active {
     background: #fff3e6;
@@ -190,8 +271,26 @@
   button.action.danger { color: var(--accent-deep); }
   button.action.danger:active { background: #fff0e2; }
 
+  button.action::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle, rgba(255,122,26,0.35) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0.3);
+    pointer-events: none;
+  }
+  button.action.rippling::after {
+    animation: rippleOut 0.5s ease-out;
+  }
+  @keyframes rippleOut {
+    0%   { opacity: 0.8; transform: scale(0.3); }
+    100% { opacity: 0; transform: scale(2.2); }
+  }
+
   #settingsToggle {
-    width: auto;
+    flex: 2.4;
     background: #ffffff;
     border: none;
     color: var(--accent-deep);
@@ -216,24 +315,22 @@
   #settingsToggle .chev { transition: transform 0.25s ease; font-size: 10px; }
   #settingsToggle.open .chev { transform: rotate(180deg); }
 
-  #rankToggle {
+  .dockIconBtn {
+    flex: 0.75;
     background: #ffffff;
     border: none;
     color: var(--accent-deep);
     border-radius: 999px;
     padding: 11px;
-    font-size: 12px;
-    font-weight: 700;
+    font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    letter-spacing: 0.02em;
     box-shadow: 0 2px 0 rgba(150,70,10,0.25);
     transform: translateY(0);
     transition: transform 0.08s ease, box-shadow 0.08s ease;
   }
-  #rankToggle:active {
+  .dockIconBtn:active {
     background: #fff3e6;
     transform: translateY(2px);
     box-shadow: 0 0 0 rgba(150,70,10,0.25);
@@ -248,16 +345,21 @@
     align-items: flex-end;
     justify-content: center;
     background: rgba(74,54,38,0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
     pointer-events: none;
-    transition: background 0.32s ease;
+    transition: background 0.32s ease, backdrop-filter 0.32s ease, -webkit-backdrop-filter 0.32s ease;
   }
   #settingsOverlay.open {
     background: rgba(74,54,38,0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
   }
 
   #settingsSheet {
     width: 100%;
+    max-width: 520px;
     max-height: 88vh;
     background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
     border-radius: 28px 28px 0 0;
@@ -314,16 +416,21 @@
     align-items: flex-end;
     justify-content: center;
     background: rgba(74,54,38,0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
     pointer-events: none;
-    transition: background 0.32s ease;
+    transition: background 0.32s ease, backdrop-filter 0.32s ease, -webkit-backdrop-filter 0.32s ease;
   }
   #rankOverlay.open {
     background: rgba(74,54,38,0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
   }
 
   #rankSheet {
     width: 100%;
+    max-width: 520px;
     max-height: 88vh;
     background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
     border-radius: 28px 28px 0 0;
@@ -371,29 +478,6 @@
     background: rgba(255,255,255,0.4);
   }
 
-  #radioToggle {
-    background: #ffffff;
-    border: none;
-    color: var(--accent-deep);
-    border-radius: 999px;
-    padding: 11px;
-    font-size: 12px;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    letter-spacing: 0.02em;
-    box-shadow: 0 2px 0 rgba(150,70,10,0.25);
-    transform: translateY(0);
-    transition: transform 0.08s ease, box-shadow 0.08s ease;
-  }
-  #radioToggle:active {
-    background: #fff3e6;
-    transform: translateY(2px);
-    box-shadow: 0 0 0 rgba(150,70,10,0.25);
-  }
-
   /* ---------- Full-screen Radio overlay ---------- */
   #radioOverlay {
     position: fixed;
@@ -403,15 +487,20 @@
     align-items: flex-end;
     justify-content: center;
     background: rgba(74,54,38,0);
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
     pointer-events: none;
-    transition: background 0.32s ease;
+    transition: background 0.32s ease, backdrop-filter 0.32s ease, -webkit-backdrop-filter 0.32s ease;
   }
   #radioOverlay.open {
     background: rgba(74,54,38,0.35);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
     pointer-events: auto;
   }
   #radioSheet {
     width: 100%;
+    max-width: 520px;
     max-height: 88vh;
     background: var(--dock-gradient, linear-gradient(180deg, #ffb35c 0%, #ff8a2e 40%, #ff7a1a 100%));
     border-radius: 28px 28px 0 0;
@@ -469,6 +558,16 @@
     flex-direction: column;
     gap: 16px;
   }
+
+  .sectionLabel {
+    color: rgba(255,255,255,0.85);
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 4px 2px -2px;
+  }
+  .sectionLabel:first-child { margin-top: 0; }
 
   .field {
     background: rgba(255,255,255,0.92);
@@ -550,6 +649,14 @@
     opacity: 0.75;
   }
   .swatch.locked.selected { border-color: transparent; }
+
+  @keyframes unlockPop {
+    0%   { transform: scale(1); filter: brightness(1); }
+    35%  { transform: scale(1.28); filter: brightness(1.6); }
+    60%  { transform: scale(0.95); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+  .justUnlocked { animation: unlockPop 0.5s cubic-bezier(.3,1.6,.4,1); }
 
   .segRow { display: flex; gap: 6px; }
   .segRow.wrap { flex-wrap: wrap; }
@@ -695,6 +802,12 @@
     padding: 10px;
     border-radius: 12px;
     margin-bottom: 12px;
+    box-shadow: 0 0 0 rgba(255,122,26,0.5);
+    animation: badgeBreathe 2.6s ease-in-out infinite;
+  }
+  @keyframes badgeBreathe {
+    0%, 100% { box-shadow: 0 0 0px rgba(255,122,26,0.35); transform: scale(1); }
+    50%      { box-shadow: 0 0 16px rgba(255,122,26,0.55); transform: scale(1.015); }
   }
   #rankTierList {
     display: flex;
@@ -708,6 +821,11 @@
     padding: 8px 10px;
     border-radius: 10px;
     background: #fdf1e6;
+    animation: tierRowIn 0.35s ease backwards;
+  }
+  @keyframes tierRowIn {
+    from { opacity: 0; transform: translateX(-8px); }
+    to   { opacity: 1; transform: translateX(0); }
   }
   .tierRow.reached {
     background: #fff0e0;
@@ -720,7 +838,14 @@
     background: var(--ink-dim);
     flex-shrink: 0;
   }
-  .tierRow.reached .tierDot { background: var(--accent); }
+  .tierRow.reached .tierDot {
+    background: var(--accent);
+    animation: tierDotPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes tierDotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255,122,26,0.5); }
+    50%      { box-shadow: 0 0 0 4px rgba(255,122,26,0); }
+  }
   .tierInfo { flex: 1; }
   .tierInfo .tierName { font-size: 12.5px; font-weight: 700; color: var(--ink); }
   .tierInfo .tierUnlock { font-size: 11px; color: var(--ink-dim); }
@@ -756,10 +881,10 @@
 <body>
 <div id="bootWarning">
   <div id="bootWarningCard">
-    <div class="bwIcon">⚠️</div>
-    <h2>Heads up — this is buggy</h2>
-    <p>Wavefinger is a work in progress. A few things don't work right yet — see <b>Customize → Known Bugs</b> for the list. Sound especially may need a couple of taps to kick in on iOS.</p>
-    <button id="bootWarningOk">Got it, continue</button>
+    <div class="bwIcon">🎵</div>
+    <h2>Welcome to Wavefinger</h2>
+    <p>A few small quirks remain — see <b>Customize → Known Bugs</b> if something feels off. Everything else should just work. Have fun!</p>
+    <button id="bootWarningOk">Let's go</button>
   </div>
 </div>
 
@@ -768,6 +893,7 @@
   <header>
     <div class="brand">
       <h1 id="logoText">Wavefinger</h1>
+      <span id="versionBadge">v1.5</span>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
       <div id="noteReadout"></div>
@@ -775,35 +901,38 @@
     </div>
   </header>
 
-  <div id="canvasWrap">
-    <canvas id="pad"></canvas>
-    <div class="axisLabel top">higher pitch</div>
-    <div class="axisLabel bottom">lower pitch</div>
-    <div id="hint">
-      <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
-        <path id="idleWave" d="M0,24 Q15,4 30,24 T60,24 T90,24 T120,24" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-      Drag anywhere on the pad.<br><b>Up / down</b> bends pitch.
+  <div id="canvasStage">
+    <div id="canvasWrap">
+      <canvas id="pad"></canvas>
+      <canvas id="reactiveLayer"></canvas>
+      <div class="axisLabel top">higher pitch</div>
+      <div class="axisLabel bottom">lower pitch</div>
+      <div id="hint">
+        <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
+          <path id="idleWave" d="M0,24 Q15,4 30,24 T60,24 T90,24 T120,24" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Drag anywhere on the pad.<br><b>Up / down</b> bends pitch.
+      </div>
     </div>
   </div>
 
   <div id="dock">
     <div class="row">
-      <button class="action" id="undoBtn">Undo</button>
-      <button class="action" id="muteBtn">Mute</button>
-      <button class="action danger" id="clearBtn">Clear trails</button>
+      <button class="action" id="undoBtn">↺ Undo</button>
+      <button class="action" id="muteBtn">🔇 Mute</button>
+      <button class="action danger" id="clearBtn">Clear</button>
     </div>
 
     <div class="row">
-      <div id="settingsToggle" style="flex: 2;">
-        <span>Customize</span>
+      <div id="settingsToggle">
+        <span>⚙ Customize</span>
         <span class="chev">▾</span>
       </div>
-      <div id="rankToggle" style="flex: 1;">
-        <span>🏆 Rank</span>
+      <div id="rankToggle" class="dockIconBtn">
+        <span>🏆</span>
       </div>
-      <div id="radioToggle" style="flex: 1;">
-        <span>📻 Radio</span>
+      <div id="radioToggle" class="dockIconBtn">
+        <span>📻</span>
       </div>
     </div>
   </div>
@@ -819,13 +948,12 @@
 
     <div class="panelInner">
 
+      <div class="sectionLabel">Appearance</div>
+
       <div class="field">
         <label>Grid size <span class="val" id="gridVal">10 × 14</span></label>
         <input type="range" id="gridSlider" min="4" max="24" step="1" value="10">
-      </div>
-
-      <div class="field">
-        <label>Line thickness <span class="val" id="thicknessVal">6px</span></label>
+        <label style="margin: 10px 0 6px;">Line thickness <span class="val" id="thicknessVal">6px</span></label>
         <input type="range" id="thicknessSlider" min="2" max="20" step="1" value="6">
       </div>
 
@@ -845,6 +973,8 @@
           <div class="swatch locked" data-c="prism" data-unlock="color">🔒</div>
         </div>
       </div>
+
+      <div class="sectionLabel">Sound</div>
 
       <div class="field">
         <label>Instrument</label>
@@ -870,10 +1000,7 @@
           <div class="seg" data-r="high">High</div>
           <div class="seg" data-r="wide">Wide</div>
         </div>
-      </div>
-
-      <div class="field">
-        <label>Musical scale</label>
+        <label style="margin: 12px 0 6px;">Musical scale</label>
         <div class="segRow" id="scaleSeg">
           <div class="seg selected" data-s="chromatic">Free</div>
           <div class="seg" data-s="major">Major</div>
@@ -898,28 +1025,24 @@
       </div>
 
       <div class="field">
-        <label>Echo</label>
+        <label>Sound effects</label>
         <div class="toggleRow" style="margin-bottom: 12px;">
           <button class="toggleBtn" id="echoToggle">
-            <span>Enabled</span>
+            <span>Echo</span>
+            <span class="toggleDot"></span>
+          </button>
+          <button class="toggleBtn" id="sustainToggle">
+            <span>Sustain</span>
             <span class="toggleDot"></span>
           </button>
         </div>
-        <label style="margin-bottom: 6px;">Amount <span class="val" id="echoAmountVal">35%</span></label>
+        <label style="margin-bottom: 6px;">Echo amount <span class="val" id="echoAmountVal">35%</span></label>
         <input type="range" id="echoAmountSlider" min="0" max="100" step="1" value="35">
-        <label style="margin: 10px 0 6px;">Delay time <span class="val" id="echoTimeVal">280ms</span></label>
+        <label style="margin: 10px 0 6px;">Echo delay <span class="val" id="echoTimeVal">280ms</span></label>
         <input type="range" id="echoTimeSlider" min="80" max="800" step="10" value="280">
       </div>
 
-      <div class="field">
-        <label>Sustain</label>
-        <div class="toggleRow">
-          <button class="toggleBtn" id="sustainToggle">
-            <span>Enabled</span>
-            <span class="toggleDot"></span>
-          </button>
-        </div>
-      </div>
+      <div class="sectionLabel">Effects</div>
 
       <div class="field">
         <label>Touch explosions</label>
@@ -938,21 +1061,20 @@
         </div>
       </div>
 
+      <div class="sectionLabel">Info</div>
+
       <div id="knownBugs">
         <h3>Known Bugs</h3>
         <ul>
-          <li>On iOS Safari, sound sometimes doesn't play on the very first touch — try tapping the pad again, or open Customize once first.</li>
-          <li>Grid snapping at low grid-size values can feel inconsistent on fast swipes.</li>
-          <li>Multi-finger (chord) playing may occasionally leave a note stuck on until you tap Clear trails or reload.</li>
-          <li>Sustain mode can leave notes ringing indefinitely — use "Clear trails" or "Mute" to stop all sound.</li>
-          <li>Undo only stores the last 15 strokes and clears when you tap "Clear trails."</li>
-          <li>Wind and Organ instruments are more CPU-intensive — may stutter on older devices with many fingers down at once.</li>
-          <li>Rank Road progress is saved only on this device/browser — clearing site data or switching devices resets it to zero.</li>
-          <li>Radio only works with a real audio file you upload — streaming links (YouTube/Spotify/TikTok) can't be played or analyzed from a webpage like this.</li>
-          <li>Beat detection is a simple bass-energy spike detector, not full music analysis — it works best with tracks that have a clear, punchy beat.</li>
-          <li>Theme colors apply to the header, dock, and panels, but a few smaller UI accents may still show the default orange in dark themes.</li>
-          <li>Slider pitch feedback plays a soft tone while dragging any Customize slider — if you don't want the noise, mute the app while adjusting settings.</li>
-          <li>The unlock code field in Rank Road accepts one secret code that unlocks everything at once — there's no hint for it in-app.</li>
+          <li>On iOS Safari, sound can occasionally need a second touch on the pad to fully kick in.</li>
+          <li>Grid snapping at low grid-size values can feel inconsistent on very fast swipes.</li>
+          <li>Multi-finger playing may rarely leave a note stuck on — tap "Clear" or "Mute" to stop it.</li>
+          <li>Sustain mode holds notes indefinitely by design — remember to Clear or Mute when done.</li>
+          <li>Undo only stores the last 15 strokes, and the history clears when you tap "Clear."</li>
+          <li>Wind and Organ are more CPU-intensive and may stutter on older devices with several fingers down.</li>
+          <li>Rank Road, unlocks, and the legacy theme are saved to this device/browser only — they don't transfer or sync.</li>
+          <li>Radio only plays real uploaded audio files — streaming links (YouTube/Spotify/TikTok) aren't supported.</li>
+          <li>Beat detection reacts to bass spikes, not full musical structure — works best on tracks with a clear, punchy beat.</li>
         </ul>
       </div>
 
@@ -1039,7 +1161,10 @@
   // ---------- Canvas setup ----------
   const canvas = document.getElementById('pad');
   const ctx = canvas.getContext('2d');
+  const reactiveCanvas = document.getElementById('reactiveLayer');
+  const reactiveCtx = reactiveCanvas.getContext('2d');
   const wrap = document.getElementById('canvasWrap');
+  const stage = document.getElementById('canvasStage');
   const hint = document.getElementById('hint');
   const noteReadout = document.getElementById('noteReadout');
 
@@ -1054,6 +1179,11 @@
     canvas.style.width = W + 'px';
     canvas.style.height = H + 'px';
     ctx.setTransform(dpr,0,0,dpr,0,0);
+    reactiveCanvas.width = Math.round(W * dpr);
+    reactiveCanvas.height = Math.round(H * dpr);
+    reactiveCanvas.style.width = W + 'px';
+    reactiveCanvas.style.height = H + 'px';
+    reactiveCtx.setTransform(dpr,0,0,dpr,0,0);
     drawGrid();
   }
   window.addEventListener('resize', resize);
@@ -1145,12 +1275,14 @@
       saveLegacyUnlock();
       updateRankUI();
       applyBgTheme();
+      playChime();
       if(msgEl){
         msgEl.textContent = 'Unlocked! Every trail, instrument, and theme is now available.';
         msgEl.style.color = '#2a7a3f';
       }
       return true;
     } else {
+      playError();
       if(msgEl){
         msgEl.textContent = 'That code isn\'t right — try again.';
         msgEl.style.color = '#c0392b';
@@ -1238,8 +1370,18 @@
     return hrs + 'h ' + remMins + 'm played';
   }
 
+  let lastKnownTierIdx = 0;
+  let rankInitialized = false;
+
   function updateRankUI(){
     const tierIdx = getCurrentTierIndex();
+    if(!rankInitialized){
+      lastKnownTierIdx = tierIdx; // first render: just record current tier, no chime
+      rankInitialized = true;
+    } else if(tierIdx > lastKnownTierIdx){
+      lastKnownTierIdx = tierIdx;
+      playChime(); // celebrate reaching a new rank tier
+    }
     const currentTier = RANK_TIERS[tierIdx];
     const playtimeEl = document.getElementById('rankPlaytimeVal');
     const badgeEl = document.getElementById('rankBadgeName');
@@ -1256,7 +1398,7 @@
         if(tier.unlockInstrument) unlocks.push(tier.unlockInstrument + ' instrument');
         if(tier.unlockBg) unlocks.push(tier.unlockBg + ' background');
         const unlockText = unlocks.length ? unlocks.join(', ') : '—';
-        return `<div class="tierRow ${reached ? 'reached' : 'locked'}">
+        return `<div class="tierRow ${reached ? 'reached' : 'locked'}" style="animation-delay: ${i*0.05}s;">
           <div class="tierDot"></div>
           <div class="tierInfo">
             <div class="tierName">${tier.name}</div>
@@ -1267,26 +1409,34 @@
       }).join('');
     }
 
-    // unlock/lock swatches and segs live
+    // unlock/lock swatches and segs live — trigger a "pop" the moment something newly unlocks
     document.querySelectorAll('[data-unlock="color"]').forEach(el=>{
       const unlocked = isUnlocked('color', el.dataset.c);
+      const wasLocked = el.classList.contains('locked');
       el.classList.toggle('locked', !unlocked);
-      if(unlocked) el.textContent = '';
+      if(unlocked){
+        el.textContent = '';
+        if(wasLocked){ el.classList.remove('justUnlocked'); void el.offsetWidth; el.classList.add('justUnlocked'); }
+      }
     });
     document.querySelectorAll('[data-unlock="instrument"]').forEach(el=>{
       const unlocked = isUnlocked('instrument', el.dataset.i);
+      const wasLocked = el.classList.contains('locked');
       el.classList.toggle('locked', !unlocked);
       if(unlocked){
         const names = { bell: 'Bell', organ: 'Organ' };
         el.textContent = names[el.dataset.i] || el.dataset.i;
+        if(wasLocked){ el.classList.remove('justUnlocked'); void el.offsetWidth; el.classList.add('justUnlocked'); }
       }
     });
     document.querySelectorAll('[data-unlock="bg"]').forEach(el=>{
       const unlocked = isUnlocked('bg', el.dataset.bg);
+      const wasLocked = el.classList.contains('locked');
       el.classList.toggle('locked', !unlocked);
       if(unlocked){
         const names = { sunset: 'Sunset', aurora: 'Aurora', prism: 'Prism' };
         el.textContent = names[el.dataset.bg] || el.dataset.bg;
+        if(wasLocked){ el.classList.remove('justUnlocked'); void el.offsetWidth; el.classList.add('justUnlocked'); }
       }
     });
   }
@@ -1391,6 +1541,13 @@
 
     updateLogoForTheme();
 
+    // animated backgrounds for exclusive/rank-unlocked themes
+    const animatedThemes = ['aurora', 'prism', 'legacy', 'sunset'];
+    ['aurora','prism','legacy','sunset'].forEach(t => wrap.classList.remove('animBg-' + t));
+    if(animatedThemes.includes(state.bgTheme)){
+      wrap.classList.add('animBg-' + state.bgTheme);
+    }
+
     // reveal the Legacy option once unlocked, and keep the seg row's visual selection in sync
     const legacySeg = document.getElementById('legacySeg');
     if(legacySeg) legacySeg.style.display = legacyUnlocked ? '' : 'none';
@@ -1412,23 +1569,30 @@
   function drawGrid(){
     ctx.clearRect(0,0,W,H);
     const cols = state.gridCols;
-    const rows = Math.round(cols * 1.4);
+    // Derive rows from the real canvas aspect ratio so each cell is a true square,
+    // instead of a fixed cols*1.4 ratio that only looked square on one specific shape.
+    const cellSize = W / cols;
+    const rows = Math.max(1, Math.round(H / cellSize));
     state.gridRows = rows;
     document.getElementById('gridVal').textContent = cols + ' × ' + rows;
+
+    // Snap every coordinate to the nearest half-pixel so 1px lines render crisp,
+    // not blurry/thick — canvas anti-aliases fractional-pixel strokes into soft bands otherwise.
+    function crisp(v){ return Math.round(v) + 0.5; }
 
     ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-line');
     ctx.lineWidth = 1;
     for(let c=1;c<cols;c++){
-      const x = (c/cols)*W;
+      const x = crisp((c/cols)*W);
       ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
     }
     for(let r=1;r<rows;r++){
-      const y = (r/rows)*H;
+      const y = crisp((r/rows)*H);
       ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
     }
     // center line slightly stronger
     ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--grid-line-strong');
-    const midY = H/2;
+    const midY = crisp(H/2);
     ctx.beginPath(); ctx.moveTo(0,midY); ctx.lineTo(W,midY); ctx.stroke();
   }
 
@@ -1449,6 +1613,7 @@
   let radioMidEnergy = 0;
   let radioTrebleEnergy = 0;
   let radioBeatDetected = false;
+  let radioLastBeatTime = 0;
   let radioBeatHistory = [];
   let radioReactEnabled = true;
   const voices = new Map(); // pointerId -> {osc, gain, filter?}
@@ -1549,28 +1714,23 @@
   let sliderToneGain = null;
   let sliderToneTimeout = null;
 
-  function startSliderTone(){
+  function startSliderTone(fraction){
     ensureAudio().then(()=>{
-      if(sliderToneOsc) return; // already sustaining
-      sliderToneOsc = actx.createOscillator();
-      sliderToneGain = actx.createGain();
-      sliderToneOsc.type = 'sine';
-      sliderToneGain.gain.value = 0;
-      sliderToneOsc.connect(sliderToneGain);
-      sliderToneGain.connect(actx.destination);
-      sliderToneOsc.start();
-      sliderToneGain.gain.setTargetAtTime(0.06, actx.currentTime, 0.02);
+      if(!sliderToneOsc){
+        sliderToneOsc = actx.createOscillator();
+        sliderToneGain = actx.createGain();
+        sliderToneOsc.type = 'sine';
+        sliderToneGain.gain.value = 0;
+        sliderToneOsc.connect(sliderToneGain);
+        sliderToneGain.connect(actx.destination);
+        sliderToneOsc.start();
+        sliderToneGain.gain.setTargetAtTime(0.06, actx.currentTime, 0.02);
+      }
+      const freq = 220 + fraction * 880; // low A up to high A-ish, two octaves of range
+      sliderToneOsc.frequency.setTargetAtTime(freq, actx.currentTime, 0.03);
+      if(sliderToneTimeout) clearTimeout(sliderToneTimeout);
+      sliderToneTimeout = setTimeout(stopSliderTone, 220);
     });
-  }
-
-  function updateSliderTone(fraction){
-    // fraction: 0 (slider min) to 1 (slider max)
-    if(!sliderToneOsc) return;
-    const freq = 220 + fraction * 880; // low A up to high A-ish, two octaves of range
-    sliderToneOsc.frequency.setTargetAtTime(freq, actx.currentTime, 0.03);
-    // reset the auto-stop timer every time the slider moves
-    if(sliderToneTimeout) clearTimeout(sliderToneTimeout);
-    sliderToneTimeout = setTimeout(stopSliderTone, 220);
   }
 
   function stopSliderTone(){
@@ -1589,11 +1749,76 @@
       const max = parseFloat(inputEl.max);
       const val = parseFloat(inputEl.value);
       const fraction = max > min ? (val - min) / (max - min) : 0;
-      startSliderTone();
-      updateSliderTone(fraction);
+      startSliderTone(fraction);
     });
     inputEl.addEventListener('touchend', stopSliderTone);
     inputEl.addEventListener('change', stopSliderTone);
+  }
+
+  // New UI sound: soft swoosh for opening/closing full-screen panels (Customize/Rank/Radio)
+  function playSwoosh(opening){
+    ensureAudio().then(()=>{
+      const t = actx.currentTime;
+      const osc = actx.createOscillator();
+      const g = actx.createGain();
+      const filter = actx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 1800;
+      osc.type = 'sawtooth';
+      const startFreq = opening ? 180 : 420;
+      const endFreq = opening ? 420 : 180;
+      osc.frequency.setValueAtTime(startFreq, t);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, t + 0.18);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.05, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+      osc.connect(filter);
+      filter.connect(g);
+      g.connect(actx.destination);
+      osc.start(t);
+      osc.stop(t + 0.22);
+    });
+  }
+
+  // New UI sound: bright ascending chime for success moments (e.g. unlock code accepted)
+  function playChime(){
+    ensureAudio().then(()=>{
+      const t = actx.currentTime;
+      const notes = [523.25, 659.25, 783.99]; // C5, E5, G5 — simple major triad arpeggio
+      notes.forEach((freq, i)=>{
+        const osc = actx.createOscillator();
+        const g = actx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        const start = t + i*0.07;
+        g.gain.setValueAtTime(0.0001, start);
+        g.gain.exponentialRampToValueAtTime(0.13, start + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, start + 0.35);
+        osc.connect(g);
+        g.connect(actx.destination);
+        osc.start(start);
+        osc.stop(start + 0.4);
+      });
+    });
+  }
+
+  // New UI sound: gentle descending tone for error/rejection moments (e.g. wrong unlock code)
+  function playError(){
+    ensureAudio().then(()=>{
+      const t = actx.currentTime;
+      const osc = actx.createOscillator();
+      const g = actx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(280, t);
+      osc.frequency.exponentialRampToValueAtTime(160, t + 0.15);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.08, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      osc.connect(g);
+      g.connect(actx.destination);
+      osc.start(t);
+      osc.stop(t + 0.2);
+    });
   }
 
   const SCALES = {
@@ -2037,6 +2262,10 @@
     }
     document.getElementById('nowPlayingField').style.display = 'none';
     document.getElementById('audioViz').style.display = 'none';
+    stage.style.filter = '';
+    stage.style.transform = '';
+    reactivePulseScale = 1;
+    reactiveBeatFlash = 0;
   }
 
   function analyzeRadioFrame(){
@@ -2055,11 +2284,19 @@
       radioMidEnergy = midSum / (midEnd - bassEnd) / 255;
       radioTrebleEnergy = trebleSum / (len - midEnd) / 255;
 
-      // simple beat detection: bass energy spikes above its recent rolling average
+      // simple beat detection: bass energy spikes above its recent rolling average.
+      // Compute the average from history BEFORE adding the current sample, so a real
+      // beat can't immediately drag its own threshold up and suppress the next beat.
+      const historyAvg = radioBeatHistory.length > 0
+        ? radioBeatHistory.reduce((a,b)=>a+b,0) / radioBeatHistory.length
+        : radioBassEnergy;
+      const now = performance.now();
+      const spikeDetected = radioBassEnergy > historyAvg * 1.3 + 0.1 && radioBassEnergy > 0.28;
+      radioBeatDetected = spikeDetected && (now - radioLastBeatTime > 180); // ~180ms min gap, avoids flicker on sustained bass
+      if(radioBeatDetected) radioLastBeatTime = now;
+
       radioBeatHistory.push(radioBassEnergy);
-      if(radioBeatHistory.length > 30) radioBeatHistory.shift();
-      const avg = radioBeatHistory.reduce((a,b)=>a+b,0) / radioBeatHistory.length;
-      radioBeatDetected = radioBassEnergy > avg * 135/100 + 0.15 && radioBassEnergy > 0.35;
+      if(radioBeatHistory.length > 43) radioBeatHistory.shift(); // ~0.7s window at 60fps, smoother baseline
 
       if(radioReactEnabled) applyMusicReaction();
       drawAudioViz();
@@ -2067,21 +2304,81 @@
     requestAnimationFrame(analyzeRadioFrame);
   }
 
-  function applyMusicReaction(){
-    // background brightness pulses gently with overall energy
-    const energy = (radioBassEnergy + radioMidEnergy + radioTrebleEnergy) / 3;
-    wrap.style.filter = `brightness(${1 + energy*0.12})`;
+  // ---------- Reactive layer: dramatic real-time visual response to music ----------
+  let reactiveBeatFlash = 0; // 0-1, decays each frame after a beat
+  let reactivePulseScale = 1; // canvas "punch" scale on beats
 
-    // beat hits trigger a burst in the middle of the pad, sized by bass energy
-    if(radioBeatDetected && state.particles){
-      const cx = W/2 + (Math.random()-0.5)*W*0.3;
-      const cy = H/2 + (Math.random()-0.5)*H*0.3;
-      const boostedIntensity = Math.min(30, state.particleIntensity + Math.floor(radioBassEnergy*15));
-      const savedIntensity = state.particleIntensity;
-      state.particleIntensity = boostedIntensity;
-      spawnBurst(cx, cy, colorForStroke(null, 0.5));
-      state.particleIntensity = savedIntensity;
+  function applyMusicReaction(){
+    const energy = (radioBassEnergy + radioMidEnergy + radioTrebleEnergy) / 3;
+
+    // Big, obvious canvas-wide scale punch on every beat — the whole pad visibly pulses.
+    if(radioBeatDetected){
+      reactivePulseScale = 1 + Math.min(0.06, radioBassEnergy * 0.09);
+      reactiveBeatFlash = 1;
     }
+    reactivePulseScale += (1 - reactivePulseScale) * 0.18; // spring back to normal
+    stage.style.transform = `scale(${reactivePulseScale})`;
+
+    // Background brightness + saturation swing hard with overall energy, not a subtle nudge.
+    stage.style.filter = `brightness(${1 + energy*0.45}) saturate(${1 + energy*0.6})`;
+
+    // Much bigger, more frequent particle bursts scattered across the pad on beats.
+    if(radioBeatDetected && state.particles){
+      const burstCount = 1 + Math.floor(radioBassEnergy * 3);
+      for(let b=0; b<burstCount; b++){
+        const cx = Math.random()*W;
+        const cy = Math.random()*H;
+        const boostedIntensity = Math.min(30, state.particleIntensity + Math.floor(radioBassEnergy*22));
+        const savedIntensity = state.particleIntensity;
+        state.particleIntensity = boostedIntensity;
+        spawnBurst(cx, cy, colorForStroke(null, Math.random()));
+        state.particleIntensity = savedIntensity;
+      }
+    }
+  }
+
+  function drawReactiveLayer(){
+    reactiveCtx.clearRect(0,0,W,H);
+
+    // decay the beat flash every frame regardless of whether music is playing
+    if(reactiveBeatFlash > 0){
+      reactiveBeatFlash *= 0.88;
+      if(reactiveBeatFlash < 0.02) reactiveBeatFlash = 0;
+    }
+
+    if(reactiveBeatFlash > 0){
+      // radial flash from center, color-matched to the current trail color
+      const flashColor = colorForStroke(null, 0.5);
+      const grad = reactiveCtx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W,H)*0.7);
+      grad.addColorStop(0, flashColor);
+      grad.addColorStop(1, 'transparent');
+      reactiveCtx.save();
+      reactiveCtx.globalAlpha = reactiveBeatFlash * 0.35;
+      reactiveCtx.fillStyle = grad;
+      reactiveCtx.fillRect(0,0,W,H);
+      reactiveCtx.restore();
+
+      // grid lines glow and thicken with the beat — genuinely reactive grid, not just background
+      const cols = state.gridCols;
+      const rows = state.gridRows || Math.round(cols*1.4);
+      reactiveCtx.save();
+      reactiveCtx.strokeStyle = flashColor;
+      reactiveCtx.globalAlpha = reactiveBeatFlash * 0.5;
+      reactiveCtx.lineWidth = 1 + reactiveBeatFlash * 3;
+      reactiveCtx.shadowColor = flashColor;
+      reactiveCtx.shadowBlur = 10 * reactiveBeatFlash;
+      for(let c=1;c<cols;c++){
+        const x = Math.round((c/cols)*W) + 0.5;
+        reactiveCtx.beginPath(); reactiveCtx.moveTo(x,0); reactiveCtx.lineTo(x,H); reactiveCtx.stroke();
+      }
+      for(let r=1;r<rows;r++){
+        const y = Math.round((r/rows)*H) + 0.5;
+        reactiveCtx.beginPath(); reactiveCtx.moveTo(0,y); reactiveCtx.lineTo(W,y); reactiveCtx.stroke();
+      }
+      reactiveCtx.restore();
+    }
+
+    requestAnimationFrame(drawReactiveLayer);
   }
 
   function drawAudioViz(){
@@ -2128,6 +2425,12 @@
   document.addEventListener('pointerdown', (e)=>{
     const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
     if(el) playClick(true, clickIntensityFor(el));
+    const rippleBtn = e.target.closest('button.action');
+    if(rippleBtn){
+      rippleBtn.classList.remove('rippling');
+      void rippleBtn.offsetWidth;
+      rippleBtn.classList.add('rippling');
+    }
   });
   document.addEventListener('pointerup', (e)=>{
     const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
@@ -2163,10 +2466,12 @@
   function openSettings(){
     settingsToggle.classList.add('open');
     settingsOverlay.classList.add('open');
+    playSwoosh(true);
   }
   function closeSettingsPanel(){
     settingsToggle.classList.remove('open');
     settingsOverlay.classList.remove('open');
+    playSwoosh(false);
   }
   settingsToggle.addEventListener('click', openSettings);
   closeSettings.addEventListener('click', closeSettingsPanel);
@@ -2182,9 +2487,11 @@
   function openRank(){
     rankOverlay.classList.add('open');
     updateRankUI();
+    playSwoosh(true);
   }
   function closeRankPanel(){
     rankOverlay.classList.remove('open');
+    playSwoosh(false);
   }
   rankToggle.addEventListener('click', openRank);
   closeRank.addEventListener('click', closeRankPanel);
@@ -2211,9 +2518,11 @@
 
   function openRadio(){
     radioOverlay.classList.add('open');
+    playSwoosh(true);
   }
   function closeRadioPanel(){
     radioOverlay.classList.remove('open');
+    playSwoosh(false);
   }
   radioToggle.addEventListener('click', openRadio);
   closeRadio.addEventListener('click', closeRadioPanel);
@@ -2254,7 +2563,11 @@
   reactToggle.addEventListener('click', ()=>{
     radioReactEnabled = !reactToggle.classList.contains('selected');
     reactToggle.classList.toggle('selected', radioReactEnabled);
-    if(!radioReactEnabled) wrap.style.filter = '';
+    if(!radioReactEnabled){
+      stage.style.filter = '';
+      stage.style.transform = '';
+      reactivePulseScale = 1;
+    }
   });
 
   const gridSlider = document.getElementById('gridSlider');
@@ -2297,6 +2610,7 @@
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
     state.instrument = seg.dataset.i;
     instrumentLabel.textContent = instNames[state.instrument];
+    instrumentLabel.classList.remove('badgeBounce'); void instrumentLabel.offsetWidth; instrumentLabel.classList.add('badgeBounce');
   });
 
   document.getElementById('rangeSeg').addEventListener('click', (e)=>{
@@ -2410,6 +2724,7 @@
   requestAnimationFrame(resize);
   requestAnimationFrame(particleLoop);
   requestAnimationFrame(analyzeRadioFrame);
+  requestAnimationFrame(drawReactiveLayer);
   setTimeout(resize, 60);
   setTimeout(resize, 300);
   if(window.ResizeObserver){
