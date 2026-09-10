@@ -138,7 +138,7 @@
     flex: 1 1 auto;
     min-height: 0;
     min-width: 0;
-    width: 100%;
+    width: calc(100% - 24px);
     display: flex;
     margin: 0 12px;
     transform-origin: center center;
@@ -170,7 +170,8 @@
 
   @media (max-width: 520px) {
     #app { max-width: none; width: 100%; }
-    #canvasStage { margin: 0 8px; }
+    header { padding-top: max(10px, env(safe-area-inset-top)); }
+    #canvasStage { width: calc(100% - 16px); margin: 0 8px; }
     #canvasWrap { border-radius: 16px; }
     .segRow.wrap { gap: 5px; }
     .segRow.wrap .seg { flex: 1 1 auto; padding: 9px 8px; }
