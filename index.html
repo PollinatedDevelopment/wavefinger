@@ -201,6 +201,15 @@
     50%      { background-position: 50% 70%; }
   }
 
+  #canvasWrap.animBg-void{
+    background-size: 180% 180%;
+    animation: voidDrift 10s ease-in-out infinite;
+  }
+  @keyframes voidDrift {
+    0%,100% { background-position: 20% 30%; filter: hue-rotate(0deg); }
+    50% { background-position: 80% 70%; filter: hue-rotate(18deg); }
+  }
+
   #hint {
     position: absolute;
     inset: 0;
@@ -359,6 +368,77 @@
     }
     .row { margin-bottom: 6px; }
   }
+
+  /* ---------- Achievements ---------- */
+  #achievementsPanel {
+    background: rgba(255,255,255,0.92);
+    border-radius: 16px;
+    padding: 14px 16px;
+  }
+  #achievementsPanel h3 {
+    margin: 0 0 6px 0;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  #achievementsPanel p {
+    margin: 0 0 12px 0;
+  }
+  #achievementList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .achievementCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: #fdf1e6;
+    border: 1px solid transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: transform 0.08s ease, background 0.15s ease, border-color 0.15s ease;
+  }
+  .achievementCard:active { transform: scale(0.985); }
+  .achievementCard.unlocked {
+    background: #fff0e0;
+    border-color: var(--accent);
+  }
+  .achievementIcon {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #e8d3bd;
+    flex: 0 0 auto;
+    font-size: 17px;
+  }
+  .achievementCard.unlocked .achievementIcon { background: var(--accent); color: #fff; }
+  .achievementInfo { flex: 1; min-width: 0; }
+  .achievementTitle { font-size: 12.5px; font-weight: 800; color: var(--ink); }
+  .achievementDesc { font-size: 11px; color: var(--ink-dim); line-height: 1.35; margin-top: 2px; }
+  .achievementReward { font-size: 10.5px; color: var(--accent-deep); font-weight: 800; text-align: right; white-space: nowrap; }
+  #unlockToast {
+    position: fixed;
+    left: 50%; bottom: 22px;
+    transform: translate(-50%, 20px);
+    z-index: 12000;
+    max-width: min(92vw, 420px);
+    padding: 11px 14px;
+    border-radius: 14px;
+    background: rgba(30,30,35,0.96);
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  #unlockToast.show { opacity: 1; transform: translate(-50%, 0); }
 
   /* ---------- Full-screen Customize overlay ---------- */
   #settingsOverlay {
@@ -661,6 +741,8 @@
   .swatch[data-c="gold"] { background: linear-gradient(135deg, #ffe066, #ffb700); }
   .swatch[data-c="ember"] { background: linear-gradient(135deg, #ff7a3d, #d81e1e); }
   .swatch[data-c="aurora"] { background: linear-gradient(135deg, #39ffbe, #2a7fff); }
+  .swatch[data-c="neon"] { background: linear-gradient(135deg, #7dff00, #00f0ff); }
+  .swatch[data-c="plasma"] { background: linear-gradient(135deg, #ff2cff, #6a33ff); }
   .swatch[data-c="prism"] {
     background: conic-gradient(#ff2fd0, #ffee00, #00e5ff, #ff2fd0);
   }
@@ -684,17 +766,39 @@
 
   .segRow { display: flex; gap: 6px; }
   .segRow.wrap { flex-wrap: wrap; }
-  .segRow.wrap .seg { flex: 0 1 auto; min-width: 68px; padding: 9px 10px; }
+  .segRow.wrap .seg { flex: 0 0 66px; min-width: 0; padding: 9px 6px; white-space: nowrap; }
+  #instrumentSeg .seg { font-size: 12px; }
+  #instrumentSeg [data-i="crystal"] { order: 10; }
+  #instrumentSeg [data-i="resonator"] { order: 11; }
   .seg {
     flex: 1;
     background: #fdf1e6;
     border: none;
     color: var(--accent-deep);
     border-radius: 999px;
-    padding: 10px 4px;
+    padding: 0 6px;
+    height: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     font-size: 12px;
+    line-height: 1;
     font-weight: 700;
     text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* Pitch-range buttons keep a uniform, compact height on mobile. */
+  #rangeSeg {
+    align-items: center;
+  }
+  #rangeSeg .seg {
+    min-width: 0;
+    padding-left: 4px;
+    padding-right: 4px;
+    font-size: 11.5px;
   }
   .seg.selected {
     background: var(--accent);
@@ -1026,6 +1130,8 @@
           <div class="swatch justUnlocked" data-c="gold" data-unlock="color"></div>
           <div class="swatch justUnlocked" data-c="ember" data-unlock="color"></div>
           <div class="swatch justUnlocked" data-c="aurora" data-unlock="color"></div>
+          <div class="swatch locked" data-c="neon" data-unlock="color"></div>
+          <div class="swatch locked" data-c="plasma" data-unlock="color"></div>
           <div class="swatch justUnlocked" data-c="prism" data-unlock="color"></div>
         </div>
       </div>
@@ -1045,6 +1151,8 @@
           <div class="seg" data-i="arp8bit">8-Bit</div>
           <div class="seg justUnlocked" data-i="bell" data-unlock="instrument">Bell</div>
           <div class="seg justUnlocked" data-i="organ" data-unlock="instrument">Organ</div>
+          <div class="seg locked" data-i="crystal" data-unlock="instrument">Crystal</div>
+          <div class="seg locked" data-i="resonator" data-unlock="instrument">Resonator</div>
         </div>
       </div>
 
@@ -1055,6 +1163,8 @@
           <div class="seg selected" data-r="mid">Mid</div>
           <div class="seg" data-r="high">High</div>
           <div class="seg" data-r="wide">Wide</div>
+          <div class="seg locked" id="titanRangeSeg" data-r="titan" data-unlock="range">🔒 Titan</div>
+          <div class="seg locked" id="unlimitedRangeSeg" data-r="unlimited" style="display:none;">∞ Unlimited</div>
         </div>
         <label style="margin: 12px 0 6px;">Musical scale</label>
         <div class="segRow" id="scaleSeg">
@@ -1076,6 +1186,7 @@
           <div class="seg justUnlocked" data-bg="sunset" data-unlock="bg">Sunset</div>
           <div class="seg justUnlocked" data-bg="aurora" data-unlock="bg">Aurora</div>
           <div class="seg justUnlocked" data-bg="prism" data-unlock="bg">Prism</div>
+          <div class="seg locked" data-bg="void" data-unlock="bg">🔒 Void</div>
           <div class="seg" id="legacySeg" data-bg="legacy" style="">Legacy</div>
         </div>
       </div>
@@ -1204,6 +1315,12 @@
         </div></div>
       </div>
 
+      <div id="achievementsPanel">
+        <h3>Achievements</h3>
+        <p class="rankNote">Complete these challenges to unlock bonus instruments, trails, themes, and pitch ranges. Tap a locked achievement to see exactly what you need to do.</p>
+        <div id="achievementList"></div>
+      </div>
+
       <div class="field">
         <label>Have a code?</label>
         <div style="display:flex; gap:8px;">
@@ -1259,6 +1376,7 @@
 </div>
 
 
+<div id="unlockToast" role="status" aria-live="polite"></div>
 <div id="tpotFadeOverlay" aria-hidden="true"></div>
 <video id="tpotIntroVideo" playsinline webkit-playsinline preload="auto" x-webkit-airplay="allow"></video>
 
@@ -1330,6 +1448,84 @@
     totalSeconds: 0
   };
 
+  const ACHIEVEMENTS = [
+    { id:'crystalListener', title:'Crystal Listener', icon:'💎', requirement:'Play for 3 minutes.', reward:'Crystal instrument', check:()=>rankData.totalSeconds >= 180 },
+    { id:'neonRunner', title:'Neon Runner', icon:'⚡', requirement:'Use 6 different trail colors.', reward:'Neon Pulse trail', check:()=>achievementData.colors.length >= 6 },
+    { id:'voidwalker', title:'Voidwalker', icon:'🪐', requirement:'Use all 4 original backgrounds: Cream, Paper, Midnight and Slate.', reward:'Void theme', check:()=>['cream','paper','midnight','slate'].every(v=>achievementData.backgrounds.includes(v)) },
+    { id:'scaleExplorer', title:'Scale Explorer', icon:'🎛️', requirement:'Try 4 different musical scales.', reward:'Titan pitch range', check:()=>achievementData.scales.length >= 4 },
+    { id:'tpotHunter', title:'TPOT Hunter', icon:'🚀', requirement:'Successfully trigger the TPOT intro 3 times.', reward:'Resonator instrument', check:()=>achievementData.tpotTriggers >= 3 }
+  ];
+
+  const achievementData = { colors:[], instruments:[], backgrounds:[], ranges:[], scales:[], tpotTriggers:0, unlocked:{} };
+  const ACHIEVEMENT_REWARDS = {
+    crystalListener: {kind:'instrument', value:'crystal'},
+    neonRunner: {kind:'color', value:'neon'},
+    voidwalker: {kind:'bg', value:'void'},
+    scaleExplorer: {kind:'range', value:'titan'},
+    tpotHunter: {kind:'instrument', value:'resonator'}
+  };
+
+  function loadAchievementData(){
+    try{
+      const saved = JSON.parse(localStorage.getItem('wavefinger_achievements') || '{}');
+      achievementData.colors = Array.isArray(saved.colors) ? saved.colors : [];
+      achievementData.instruments = Array.isArray(saved.instruments) ? saved.instruments : [];
+      achievementData.backgrounds = Array.isArray(saved.backgrounds) ? saved.backgrounds : [];
+      achievementData.ranges = Array.isArray(saved.ranges) ? saved.ranges : [];
+      achievementData.scales = Array.isArray(saved.scales) ? saved.scales : [];
+      achievementData.tpotTriggers = Number.isFinite(saved.tpotTriggers) ? saved.tpotTriggers : 0;
+      achievementData.unlocked = saved.unlocked && typeof saved.unlocked === 'object' ? saved.unlocked : {};
+    }catch(e){}
+  }
+  function saveAchievementData(){
+    try{ localStorage.setItem('wavefinger_achievements', JSON.stringify(achievementData)); }catch(e){}
+  }
+  function recordAchievementUse(kind, value){
+    const arr = achievementData[kind];
+    if(!Array.isArray(arr) || !value || arr.includes(value)) return;
+    arr.push(value);
+    saveAchievementData();
+    checkAchievements();
+  }
+  function recordAchievementScale(value){
+    if(!value || achievementData.scales.includes(value)) return;
+    achievementData.scales.push(value);
+    saveAchievementData();
+    checkAchievements();
+  }
+  function recordTPOTTrigger(){
+    achievementData.tpotTriggers += 1;
+    saveAchievementData();
+    checkAchievements();
+  }
+  function showUnlockMessage(text){
+    const el = document.getElementById('unlockToast');
+    if(!el) return;
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(showUnlockMessage.timer);
+    showUnlockMessage.timer = setTimeout(()=>el.classList.remove('show'), 2600);
+  }
+  function checkAchievements(){
+    let changed = false;
+    ACHIEVEMENTS.forEach(a=>{
+      if(!achievementData.unlocked[a.id] && a.check()){
+        achievementData.unlocked[a.id] = true;
+        changed = true;
+        playChime();
+      }
+    });
+    if(changed) saveAchievementData();
+    updateAchievementUI();
+    updateRankUI();
+  }
+  function isAchievementUnlocked(id){ return !!achievementData.unlocked[id]; }
+  function achievementRewardUnlocked(kind, value){
+    if(masterUnlocked) return true;
+    return Object.entries(ACHIEVEMENT_REWARDS).some(([id,reward])=>reward.kind===kind && reward.value===value && isAchievementUnlocked(id));
+  }
+  loadAchievementData();
+
   function loadRankData(){
     try{
       const saved = localStorage.getItem('wavefinger_playtime');
@@ -1353,6 +1549,7 @@
 
   function isUnlocked(kind, value){
     if(masterUnlocked) return true; // secret code unlocks everything, regardless of rank
+    if(achievementRewardUnlocked(kind, value)) return true;
     // kind: 'color' | 'instrument' | 'bg'
     const tierIdx = getCurrentTierIndex();
     for(let i=0;i<=tierIdx;i++){
@@ -1372,20 +1569,50 @@
   }
 
   const UNLOCK_CODE = 'wavefinger10'; // secret code — unlocks every theme and trail at once
+  const UNLIMITED_CODE = 'AbsoluteUnlimited';
+  let unlimitedUnlocked = false;
+  function loadUnlimitedUnlock(){
+    try{ unlimitedUnlocked = localStorage.getItem('wavefinger_unlimited_unlocked') === '1'; }catch(e){}
+  }
+  function saveUnlimitedUnlock(){
+    try{ localStorage.setItem('wavefinger_unlimited_unlocked', '1'); }catch(e){}
+  }
 
   function tryUnlockCode(code){
     const normalized = code.trim().toLowerCase();
     const msgEl = document.getElementById('unlockCodeMsg');
+    if(normalized === UNLIMITED_CODE.toLowerCase()) {
+      unlimitedUnlocked = true;
+      saveUnlimitedUnlock();
+      updateUnlimitedRangeUI();
+      playChime();
+      if(msgEl){
+        msgEl.textContent = 'Unlocked! Absolute Unlimited is now available in Pitch range.';
+        msgEl.style.color = '#2a7a3f';
+      }
+      return true;
+    }
     if(normalized === UNLOCK_CODE){
+      // Wavefinger10 is the master code: unlock absolutely everything that is locked,
+      // including all achievement rewards and bonus pitch ranges.
       masterUnlocked = true;
       legacyUnlocked = true;
+      unlimitedUnlocked = true;
+      ACHIEVEMENTS.forEach(a=>{ achievementData.unlocked[a.id] = true; });
+
       saveMasterUnlock();
       saveLegacyUnlock();
+      saveUnlimitedUnlock();
+      saveAchievementData();
+
+      updateAchievementUI();
+      updateAchievementLockedItems();
+      updateUnlimitedRangeUI();
       updateRankUI();
       applyBgTheme();
       playChime();
       if(msgEl){
-        msgEl.textContent = 'Unlocked! Every trail, instrument, and theme is now available.';
+        msgEl.textContent = 'Unlocked! Wavefinger10 unlocked every locked instrument, trail, theme, achievement, and pitch range.';
         msgEl.style.color = '#2a7a3f';
       }
       return true;
@@ -1407,6 +1634,7 @@
       if(activePointerIds.size > 0){
         rankData.totalSeconds += 1;
         saveRankData();
+        checkAchievements();
         updateRankUI();
       }
     }, 1000);
@@ -1481,6 +1709,52 @@
   let lastKnownTierIdx = 0;
   let rankInitialized = false;
 
+  function updateAchievementUI(){
+    const list = document.getElementById('achievementList');
+    if(!list) return;
+    list.innerHTML = ACHIEVEMENTS.map(a=>{
+      const unlocked = isAchievementUnlocked(a.id);
+      const reward = ACHIEVEMENT_REWARDS[a.id];
+      const stateText = unlocked ? 'Unlocked ✓' : '🔒 Locked';
+      return `<div class="achievementCard ${unlocked?'unlocked':''}" data-achievement="${a.id}">
+        <div class="achievementIcon">${unlocked ? '✓' : a.icon}</div>
+        <div class="achievementInfo">
+          <div class="achievementTitle">${a.title}</div>
+          <div class="achievementDesc">${unlocked ? 'Completed — reward unlocked.' : a.requirement}</div>
+        </div>
+        <div class="achievementReward">${stateText}<br>${a.reward}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function getUnlockMessageForElement(el){
+    if(el.dataset.r === 'titan') return isAchievementUnlocked('scaleExplorer') ? '' : 'Locked: earn the “Scale Explorer” achievement by trying 4 different musical scales.';
+    if(el.dataset.r === 'unlimited') return unlimitedUnlocked ? '' : 'Locked: enter the code AbsoluteUnlimited to unlock ∞ Unlimited.';
+    const kind = el.dataset.unlock;
+    const value = el.dataset.c || el.dataset.i || el.dataset.bg;
+    if(!kind || !value) return '';
+    for(const a of ACHIEVEMENTS){
+      const reward = ACHIEVEMENT_REWARDS[a.id];
+      if(reward && reward.kind === kind && reward.value === value && !isAchievementUnlocked(a.id)) return `Locked: ${a.requirement} (${a.title}).`;
+    }
+    return 'Locked: keep playing to reach the required Rank Road tier.';
+  }
+
+  function updateAchievementLockedItems(){
+    document.querySelectorAll('[data-unlock]').forEach(el=>{
+      el.dataset.unlockMessage = getUnlockMessageForElement(el);
+    });
+    const uni = document.getElementById('unlimitedRangeSeg');
+    if(uni) uni.dataset.unlockMessage = getUnlockMessageForElement(uni);
+    const titan = document.getElementById('titanRangeSeg');
+    if(titan){
+      const unlocked = isUnlocked('range', 'titan');
+      titan.classList.toggle('locked', !unlocked);
+      titan.textContent = unlocked ? 'Titan' : '🔒 Titan';
+      titan.dataset.unlockMessage = getUnlockMessageForElement(titan);
+    }
+  }
+
   function updateRankUI(){
     const tierIdx = getCurrentTierIndex();
     if(!rankInitialized){
@@ -1532,7 +1806,7 @@
       const wasLocked = el.classList.contains('locked');
       el.classList.toggle('locked', !unlocked);
       if(unlocked){
-        const names = { bell: 'Bell', organ: 'Organ' };
+        const names = { bell: 'Bell', organ: 'Organ', crystal: 'Crystal', resonator: 'Resonator' };
         el.textContent = names[el.dataset.i] || el.dataset.i;
         if(wasLocked){ el.classList.remove('justUnlocked'); void el.offsetWidth; el.classList.add('justUnlocked'); }
       }
@@ -1547,6 +1821,8 @@
         if(wasLocked){ el.classList.remove('justUnlocked'); void el.offsetWidth; el.classList.add('justUnlocked'); }
       }
     });
+    updateAchievementLockedItems();
+    updateAchievementUI();
   }
 
 
@@ -1559,7 +1835,9 @@
     white: '#f2f2f2',
     gold: '#ffd23f',
     ember: '#ff3d1a',
-    aurora: '#39ffbe'
+    aurora: '#39ffbe',
+    neon: '#7dff00',
+    plasma: '#ff2cff'
     // prism handled specially in colorForStroke — it's a cycling gradient, not a fixed hex
   };
 
@@ -1616,6 +1894,13 @@
     legacy: `
       radial-gradient(ellipse at 50% 0%, rgba(255,91,60,0.06), transparent 60%),
       #0a0a0c
+    `,
+
+    void: `
+      radial-gradient(ellipse at 50% 20%, rgba(0,255,255,0.13), transparent 55%),
+      radial-gradient(circle at 20% 75%, rgba(255,0,170,0.11), transparent 35%),
+      radial-gradient(circle at 80% 65%, rgba(120,80,255,0.14), transparent 40%),
+      linear-gradient(160deg, #03040a 0%, #090d1b 48%, #050711 100%)
     `
   };
 
@@ -1629,14 +1914,15 @@
     sunset:   { pageBg: '#fff6e8', dockGradient: 'linear-gradient(180deg, #ffb37a 0%, #ff8a5a 45%, #ff6b45 100%)' },
     aurora:   { pageBg: '#05080f', dockGradient: 'linear-gradient(180deg, #2ad6a8 0%, #2a7fff 45%, #6a4fd6 100%)' },
     prism:    { pageBg: '#160a26', dockGradient: 'linear-gradient(180deg, #ff2fd0 0%, #6a2fd6 45%, #2fb8ff 100%)' },
-    legacy:   { pageBg: '#0a0a0c', dockGradient: 'linear-gradient(180deg, #232328 0%, #17171a 45%, #0a0a0c 100%)' }
+    legacy:   { pageBg: '#0a0a0c', dockGradient: 'linear-gradient(180deg, #232328 0%, #17171a 45%, #0a0a0c 100%)' },
+    void:     { pageBg: '#04050b', dockGradient: 'linear-gradient(180deg, #2a1a55 0%, #151b4d 45%, #07101f 100%)' }
   };
 
   function applyBgTheme(){
     const bg = bgThemes[state.bgTheme] || bgThemes.cream;
     wrap.style.setProperty('--canvas-bg', bg);
     // dark/exclusive themes need brighter grid lines so they stay visible
-    const isDark = ['midnight','slate','aurora','prism','legacy'].includes(state.bgTheme);
+    const isDark = ['midnight','slate','aurora','prism','legacy','void'].includes(state.bgTheme);
     document.documentElement.style.setProperty('--grid-line', isDark ? 'rgba(255,255,255,0.10)' : 'rgba(74,54,38,0.06)');
     document.documentElement.style.setProperty('--grid-line-strong', isDark ? 'rgba(255,255,255,0.20)' : 'rgba(74,54,38,0.13)');
 
@@ -1650,8 +1936,8 @@
     updateLogoForTheme();
 
     // animated backgrounds for exclusive/rank-unlocked themes
-    const animatedThemes = ['aurora', 'prism', 'legacy', 'sunset'];
-    ['aurora','prism','legacy','sunset'].forEach(t => wrap.classList.remove('animBg-' + t));
+    const animatedThemes = ['aurora', 'prism', 'legacy', 'sunset', 'void'];
+    ['aurora','prism','legacy','sunset','void'].forEach(t => wrap.classList.remove('animBg-' + t));
     if(animatedThemes.includes(state.bgTheme)){
       wrap.classList.add('animBg-' + state.bgTheme);
     }
@@ -1670,8 +1956,25 @@
     low:  { min: 55,  max: 440 },   // A1 - A4
     mid:  { min: 130, max: 1046 },  // C3 - C6
     high: { min: 440, max: 2637 },  // A4 - E7
-    wide: { min: 40,  max: 3520 }   // E1 - A7
+    wide: { min: 40,  max: 3520 },  // E1 - A7
+    unlimited: { min: 27.5, max: 14080 }, // A0 - A9
+    titan: { min: 27.5, max: 10548.08 } // A0 - G#8 bonus range; narrower than Unlimited
   };
+
+  function updateUnlimitedRangeUI(){
+    const seg = document.getElementById('unlimitedRangeSeg');
+    if(!seg) return;
+    seg.style.display = unlimitedUnlocked ? '' : 'none';
+    seg.classList.toggle('locked', !unlimitedUnlocked);
+    if(!unlimitedUnlocked && state.range === 'unlimited'){
+      state.range = 'wide';
+      document.querySelectorAll('#rangeSeg .seg').forEach(el=>el.classList.toggle('selected', el.dataset.r === 'wide'));
+    }
+  }
+
+  loadUnlimitedUnlock();
+  updateAchievementUI();
+  updateAchievementLockedItems();
 
   // ---------- Grid drawing ----------
   function drawGrid(){
@@ -2018,6 +2321,44 @@
       });
       return { oscs, gain, ratios, isOrgan: true };
 
+    } else if(inst === 'crystal'){
+      // Bright glass-like FM tone: inharmonic partial with a gentle high-pass.
+      const carrier = actx.createOscillator();
+      carrier.type = 'sine';
+      const mod = actx.createOscillator();
+      mod.type = 'sine';
+      const modGain = actx.createGain();
+      modGain.gain.value = 180;
+      mod.connect(modGain);
+      modGain.connect(carrier.frequency);
+      const filter = actx.createBiquadFilter();
+      filter.type = 'highpass';
+      filter.frequency.value = 260;
+      filter.Q.value = 0.7;
+      carrier.connect(filter);
+      filter.connect(gain);
+      carrier.start(); mod.start();
+      return { oscs: [carrier, mod], gain, mod, modGain, filter, isCrystal: true };
+
+    } else if(inst === 'resonator'){
+      // Hollow resonator: square fundamental through a band-pass plus a quiet fifth.
+      const osc = actx.createOscillator();
+      osc.type = 'square';
+      const fifth = actx.createOscillator();
+      fifth.type = 'sawtooth';
+      const filter = actx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.Q.value = 5;
+      const g1 = actx.createGain();
+      g1.gain.value = 0.42;
+      const g2 = actx.createGain();
+      g2.gain.value = 0.10;
+      osc.connect(filter);
+      filter.connect(g1); g1.connect(gain);
+      fifth.connect(g2); g2.connect(gain);
+      osc.start(); fifth.start();
+      return { oscs: [osc, fifth], gain, filter, g1, g2, isResonator: true };
+
     } else if(inst === 'choir'){
       // three slightly detuned triangles for a chorus-like shimmer
       const detunes = [-7, 0, 8];
@@ -2091,11 +2432,27 @@
   function updateVoice(v, freq, vol){
     const now = actx.currentTime;
 
+    // Boost very low notes (octaves 0-2) so A0-A2 and nearby notes are easier
+    // to hear on small speakers, while leaving higher registers unchanged.
+    const midi = 69 + 12*Math.log2(freq/440);
+    const octave = Math.floor(midi / 12) - 1;
+    const lowPitchBoost = octave <= 0 ? 2.0 : octave <= 2 ? 1.7 : 1.0;
+    const boostedVol = Math.min(1, vol * lowPitchBoost);
+
     if(v.isOrgan){
       v.oscs.forEach((o,i)=> o.frequency.setTargetAtTime(freq*v.ratios[i], now, 0.02));
     } else if(v.isBell){
       v.oscs[0].frequency.setTargetAtTime(freq, now, 0.02);
       v.oscs[1].frequency.setTargetAtTime(freq*v.ratio, now, 0.02);
+    } else if(v.isCrystal){
+      v.oscs[0].frequency.setTargetAtTime(freq, now, 0.02);
+      v.oscs[1].frequency.setTargetAtTime(freq*2.73, now, 0.02);
+      v.modGain.gain.setTargetAtTime(Math.min(520, 40 + freq*0.45), now, 0.03);
+      v.filter.frequency.setTargetAtTime(Math.max(260, freq*0.9), now, 0.03);
+    } else if(v.isResonator){
+      v.oscs[0].frequency.setTargetAtTime(freq, now, 0.02);
+      v.oscs[1].frequency.setTargetAtTime(freq*1.5, now, 0.02);
+      v.filter.frequency.setTargetAtTime(Math.max(120, freq*1.8), now, 0.03);
     } else if(v.isWind){
       // map pitch to filter center frequency instead of oscillator pitch
       v.filter.frequency.setTargetAtTime(200 + freq*1.5, now, 0.05);
@@ -2104,11 +2461,11 @@
     }
 
     if(v.isPluck){
-      v.gain.gain.setTargetAtTime(vol*0.8, now, 0.015);
+      v.gain.gain.setTargetAtTime(boostedVol*0.8, now, 0.015);
     } else if(v.isWind){
-      v.gain.gain.setTargetAtTime(vol*0.35, now, 0.03);
+      v.gain.gain.setTargetAtTime(boostedVol*0.35, now, 0.03);
     } else {
-      v.gain.gain.setTargetAtTime(vol*0.6, now, 0.02);
+      v.gain.gain.setTargetAtTime(boostedVol*0.6, now, 0.02);
     }
   }
 
@@ -2336,6 +2693,9 @@
       const vp = tpotIntroVideo.play();
       if(vp && vp.catch) vp.catch(()=>{});
     }catch(e){}
+    try{
+      if(ap && ap.catch) ap.catch(()=>{});
+    }catch(e){}
   }
 
   function startTPOTSequence(pointerId, startFreq, voice){
@@ -2345,7 +2705,12 @@
     tpotSequencePointerId = pointerId;
     cancelAHold();
 
-    const targetFreq = nextDAboveA(startFreq);
+    // In Unlimited mode, keep the TPOT rise inside the audible range.
+    // Starting at the top note A9 must never attempt to rise to D10.
+    const unlimitedMax = rangeMap.unlimited.max;
+    const targetFreq = (state.range === 'unlimited' && startFreq >= unlimitedMax)
+      ? unlimitedMax
+      : Math.min(nextDAboveA(startFreq), state.range === 'unlimited' ? unlimitedMax : Infinity);
     const startTime = performance.now();
     const duration = 800;
 
@@ -2393,6 +2758,7 @@
         noteReadout.textContent = noteNameFromFreq(targetFreq);
 
         tpotIntroPlaying = true;
+        recordTPOTTrigger();
 
         // Start the intro, then let the transition D finish 0.5 seconds later.
         // The media was primed from the original touch. Restart both tracks at 0
@@ -2405,14 +2771,14 @@
         const startVideo = tpotIntroVideo.play();
         if(startVideo && startVideo.catch) startVideo.catch(()=>{});
         if(!isMuted){
-          // Unmute after playback has successfully started.
+          // Unmute after playback has successfully started. Because playback
+          // itself was initiated from the user's touch, this works on mobile
+          // without requiring a second play press.
           setTimeout(()=>{
             tpotIntroVideo.muted = false;
             tpotIntroVideo.removeAttribute('muted');
-            tpotIntroVideo.volume = 1;
           }, 60);
         }
-
 
         // Keep the transition D sounding for exactly 1.0s after the intro starts.
         setTimeout(()=>{
@@ -2864,6 +3230,18 @@
     if(e.target === rankOverlay) closeRankPanel();
   });
 
+  document.getElementById('achievementList').addEventListener('click', (e)=>{
+    const card = e.target.closest('.achievementCard');
+    if(!card) return;
+    const a = ACHIEVEMENTS.find(x=>x.id === card.dataset.achievement);
+    if(!a) return;
+    if(isAchievementUnlocked(a.id)){
+      showUnlockMessage(`${a.title} complete! Reward: ${a.reward}.`);
+    }else{
+      showUnlockMessage(`Locked: ${a.requirement} Reward: ${a.reward}.`);
+    }
+  });
+
   const unlockCodeInput = document.getElementById('unlockCodeInput');
   const unlockCodeBtn = document.getElementById('unlockCodeBtn');
   unlockCodeBtn.addEventListener('click', ()=>{
@@ -2957,23 +3335,25 @@
   document.getElementById('colorSwatches').addEventListener('click', (e)=>{
     const sw = e.target.closest('.swatch');
     if(!sw) return;
-    if(sw.classList.contains('locked')){ playClick(true); return; } // locked: just a click sound, no selection
+    if(sw.classList.contains('locked')){ playClick(true); showUnlockMessage(sw.dataset.unlockMessage || 'This item is locked. Check Rank Road → Achievements.'); return; }
     document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
     sw.classList.add('selected');
     sw.classList.remove('justSelected'); void sw.offsetWidth; sw.classList.add('justSelected');
     state.color = sw.dataset.c;
+    recordAchievementUse('colors', state.color);
   });
 
   const instrumentLabel = document.getElementById('instrumentLabel');
-  const instNames = {sine:'Sine', triangle:'Triangle', square:'Square', sawtooth:'Saw', pluck:'Pluck', choir:'Choir', wind:'Wind', arp8bit:'8-Bit', bell:'Bell', organ:'Organ'};
+  const instNames = {sine:'Sine', triangle:'Triangle', square:'Square', sawtooth:'Saw', pluck:'Pluck', choir:'Choir', wind:'Wind', arp8bit:'8-Bit', bell:'Bell', organ:'Organ', crystal:'Crystal', resonator:'Resonator'};
   document.getElementById('instrumentSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
     if(!seg) return;
-    if(seg.classList.contains('locked')){ playClick(true); return; }
+    if(seg.classList.contains('locked')){ playClick(true); showUnlockMessage(seg.dataset.unlockMessage || 'This instrument is locked. Check Rank Road → Achievements.'); return; }
     document.querySelectorAll('#instrumentSeg .seg').forEach(s=>s.classList.remove('selected'));
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
     state.instrument = seg.dataset.i;
+    recordAchievementUse('instruments', state.instrument);
     instrumentLabel.textContent = instNames[state.instrument];
     instrumentLabel.classList.remove('badgeBounce'); void instrumentLabel.offsetWidth; instrumentLabel.classList.add('badgeBounce');
   });
@@ -2981,11 +3361,19 @@
   document.getElementById('rangeSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
     if(!seg) return;
+    if(seg.classList.contains('locked')){
+      playClick(true);
+      showUnlockMessage(seg.dataset.unlockMessage || 'This pitch range is locked. Check Rank Road → Achievements.');
+      return;
+    }
     document.querySelectorAll('#rangeSeg .seg').forEach(s=>s.classList.remove('selected'));
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
     state.range = seg.dataset.r;
+    recordAchievementUse('ranges', state.range);
   });
+  updateUnlimitedRangeUI();
+  updateAchievementUI();
 
   document.getElementById('scaleSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
@@ -2994,17 +3382,27 @@
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
     state.scale = seg.dataset.s;
+    recordAchievementScale(state.scale);
   });
 
   document.getElementById('bgSeg').addEventListener('click', (e)=>{
     const seg = e.target.closest('.seg');
     if(!seg) return;
-    if(seg.classList.contains('locked')){ playClick(true); return; }
+    if(seg.classList.contains('locked')){ playClick(true); showUnlockMessage(seg.dataset.unlockMessage || 'This theme is locked. Check Rank Road → Achievements.'); return; }
     document.querySelectorAll('#bgSeg .seg').forEach(s=>s.classList.remove('selected'));
     seg.classList.add('selected');
     seg.classList.remove('justSelected'); void seg.offsetWidth; seg.classList.add('justSelected');
     state.bgTheme = seg.dataset.bg;
+    recordAchievementUse('backgrounds', state.bgTheme);
     applyBgTheme();
+  });
+
+  document.addEventListener('click', (e)=>{
+    const el = e.target.closest('.locked[data-unlock-message]');
+    if(!el) return;
+    if(el.closest('#rangeSeg, #colorSwatches, #instrumentSeg, #bgSeg')) return;
+    const msg = el.dataset.unlockMessage;
+    if(msg) showUnlockMessage(msg);
   });
 
   const echoToggle = document.getElementById('echoToggle');
