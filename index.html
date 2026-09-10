@@ -1,6 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" style="--grid-line: rgba(74,54,38,0.06); --grid-line-strong: rgba(74,54,38,0.13); --bg: #ffffff; --dock-gradient: linear-gradient(180deg, #ffb35c 0%, #ff8a2e 45%, #ff7a1a 100%);"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -878,7 +878,7 @@
   }
   </style>
 </head>
-<body>
+<body style="background: rgb(255, 255, 255);">
 <div id="bootWarning">
   <div id="bootWarningCard">
     <div class="bwIcon">🎵</div>
@@ -892,7 +892,7 @@
 
   <header>
     <div class="brand">
-      <h1 id="logoText">Wavefinger</h1>
+      <h1 id="logoText"><span class="logoLetter" data-idx="0">W</span><span class="logoLetter" data-idx="1">a</span><span class="logoLetter" data-idx="2">v</span><span class="logoLetter" data-idx="3">e</span><span class="logoLetter" data-idx="4">f</span><span class="logoLetter" data-idx="5">i</span><span class="logoLetter" data-idx="6">n</span><span class="logoLetter" data-idx="7">g</span><span class="logoLetter" data-idx="8">e</span><span class="logoLetter" data-idx="9">r</span></h1>
       <span id="versionBadge">v1.5</span>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
@@ -902,14 +902,14 @@
   </header>
 
   <div id="canvasStage">
-    <div id="canvasWrap">
-      <canvas id="pad"></canvas>
-      <canvas id="reactiveLayer"></canvas>
+    <div id="canvasWrap" style="--canvas-bg: #fdfaf6;">
+      <canvas id="pad" width="496" height="728" style="width: 496px; height: 728px;"></canvas>
+      <canvas id="reactiveLayer" width="496" height="728" style="width: 496px; height: 728px;"></canvas>
       <div class="axisLabel top">higher pitch</div>
       <div class="axisLabel bottom">lower pitch</div>
       <div id="hint">
         <svg width="120" height="48" viewBox="0 0 120 48" fill="none">
-          <path id="idleWave" d="M0,24 Q15,4 30,24 T60,24 T90,24 T120,24" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"/>
+          <path id="idleWave" d="M0,24 L0,24.9 L6,23.5 L12,22.2 L18,21.3 L24,21.0 L30,21.4 L36,22.4 L42,23.8 L48,25.2 L54,26.3 L60,26.9 L66,26.9 L72,26.2 L78,25.0 L84,23.6 L90,22.3 L96,21.3 L102,21.0 L108,21.4 L114,22.3 L120,23.6" stroke="#ff5e1a" stroke-width="2" stroke-linecap="round"></path>
         </svg>
         Drag anywhere on the pad.<br><b>Up / down</b> bends pitch.
       </div>
@@ -919,7 +919,7 @@
   <div id="dock">
     <div class="row">
       <button class="action" id="undoBtn">↺ Undo</button>
-      <button class="action" id="muteBtn">🔇 Mute</button>
+      <button class="action" id="muteBtn"><span id="muteBtnIcon">🔇</span> <span id="muteBtnLabel">Mute</span></button>
       <button class="action danger" id="clearBtn">Clear</button>
     </div>
 
@@ -930,9 +930,6 @@
       </div>
       <div id="rankToggle" class="dockIconBtn">
         <span>🏆</span>
-      </div>
-      <div id="radioToggle" class="dockIconBtn">
-        <span>📻</span>
       </div>
     </div>
   </div>
@@ -951,7 +948,7 @@
       <div class="sectionLabel">Appearance</div>
 
       <div class="field">
-        <label>Grid size <span class="val" id="gridVal">10 × 14</span></label>
+        <label>Grid size <span class="val" id="gridVal">10 × 15</span></label>
         <input type="range" id="gridSlider" min="4" max="24" step="1" value="10">
         <label style="margin: 10px 0 6px;">Line thickness <span class="val" id="thicknessVal">6px</span></label>
         <input type="range" id="thicknessSlider" min="2" max="20" step="1" value="6">
@@ -967,10 +964,10 @@
           <div class="swatch" data-c="pink"></div>
           <div class="swatch" data-c="white"></div>
           <div class="swatch" data-c="rainbow"></div>
-          <div class="swatch locked" data-c="gold" data-unlock="color">🔒</div>
-          <div class="swatch locked" data-c="ember" data-unlock="color">🔒</div>
-          <div class="swatch locked" data-c="aurora" data-unlock="color">🔒</div>
-          <div class="swatch locked" data-c="prism" data-unlock="color">🔒</div>
+          <div class="swatch justUnlocked" data-c="gold" data-unlock="color"></div>
+          <div class="swatch justUnlocked" data-c="ember" data-unlock="color"></div>
+          <div class="swatch justUnlocked" data-c="aurora" data-unlock="color"></div>
+          <div class="swatch justUnlocked" data-c="prism" data-unlock="color"></div>
         </div>
       </div>
 
@@ -987,8 +984,8 @@
           <div class="seg" data-i="choir">Choir</div>
           <div class="seg" data-i="wind">Wind</div>
           <div class="seg" data-i="arp8bit">8-Bit</div>
-          <div class="seg locked" data-i="bell" data-unlock="instrument">🔒 Bell</div>
-          <div class="seg locked" data-i="organ" data-unlock="instrument">🔒 Organ</div>
+          <div class="seg justUnlocked" data-i="bell" data-unlock="instrument">Bell</div>
+          <div class="seg justUnlocked" data-i="organ" data-unlock="instrument">Organ</div>
         </div>
       </div>
 
@@ -1017,10 +1014,10 @@
           <div class="seg" data-bg="paper">Paper</div>
           <div class="seg" data-bg="midnight">Midnight</div>
           <div class="seg" data-bg="slate">Slate</div>
-          <div class="seg locked" data-bg="sunset" data-unlock="bg">🔒 Sunset</div>
-          <div class="seg locked" data-bg="aurora" data-unlock="bg">🔒 Aurora</div>
-          <div class="seg locked" data-bg="prism" data-unlock="bg">🔒 Prism</div>
-          <div class="seg" id="legacySeg" data-bg="legacy" style="display:none;">Legacy</div>
+          <div class="seg justUnlocked" data-bg="sunset" data-unlock="bg">Sunset</div>
+          <div class="seg justUnlocked" data-bg="aurora" data-unlock="bg">Aurora</div>
+          <div class="seg justUnlocked" data-bg="prism" data-unlock="bg">Prism</div>
+          <div class="seg" id="legacySeg" data-bg="legacy" style="">Legacy</div>
         </div>
       </div>
 
@@ -1091,19 +1088,67 @@
 
     <div class="panelInner">
       <div id="rankRoad">
-        <h3>Progress <span class="val" id="rankPlaytimeVal">0m played</span></h3>
+        <h3>Progress <span class="val" id="rankPlaytimeVal">2m played</span></h3>
         <p class="rankNote">Tracked on this device only. Play time adds up while you're actively dragging on the pad. Higher ranks unlock exclusive trail colors, instruments, and grid backgrounds — nothing else changes.</p>
         <div id="rankBadge">
           <span id="rankBadgeName">Newcomer</span>
         </div>
-        <div id="rankTierList"></div>
+        <div id="rankTierList"><div class="tierRow reached" style="animation-delay: 0s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Newcomer</div>
+            <div class="tierUnlock">—</div>
+          </div>
+          <div class="tierMins">0m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.05s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Doodler</div>
+            <div class="tierUnlock">gold trail</div>
+          </div>
+          <div class="tierMins">5m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.1s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Sketcher</div>
+            <div class="tierUnlock">bell instrument</div>
+          </div>
+          <div class="tierMins">15m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.15000000000000002s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Composer</div>
+            <div class="tierUnlock">ember trail, sunset background</div>
+          </div>
+          <div class="tierMins">30m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.2s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Virtuoso</div>
+            <div class="tierUnlock">organ instrument</div>
+          </div>
+          <div class="tierMins">60m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.25s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Maestro</div>
+            <div class="tierUnlock">aurora trail, aurora background</div>
+          </div>
+          <div class="tierMins">120m</div>
+        </div><div class="tierRow locked" style="animation-delay: 0.30000000000000004s;">
+          <div class="tierDot"></div>
+          <div class="tierInfo">
+            <div class="tierName">Legend</div>
+            <div class="tierUnlock">prism trail, prism background</div>
+          </div>
+          <div class="tierMins">240m</div>
+        </div></div>
       </div>
 
       <div class="field">
         <label>Have a code?</label>
         <div style="display:flex; gap:8px;">
-          <input type="text" id="unlockCodeInput" placeholder="Enter code" autocapitalize="off" autocorrect="off" spellcheck="false"
-            style="flex:1; border:none; border-radius:10px; padding:10px 12px; font-size:13px; background:#fff; color:var(--ink);">
+          <input type="text" id="unlockCodeInput" placeholder="Enter code" autocapitalize="off" autocorrect="off" spellcheck="false" style="flex:1; border:none; border-radius:10px; padding:10px 12px; font-size:13px; background:#fff; color:var(--ink);">
           <button class="action" id="unlockCodeBtn" style="flex: 0 0 auto; padding: 10px 16px;">Unlock</button>
         </div>
         <p class="rankNote" id="unlockCodeMsg" style="margin-top: 8px;"></p>
@@ -2423,7 +2468,7 @@
     return 'normal';
   }
   document.addEventListener('pointerdown', (e)=>{
-    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
+    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle');
     if(el) playClick(true, clickIntensityFor(el));
     const rippleBtn = e.target.closest('button.action');
     if(rippleBtn){
@@ -2433,7 +2478,7 @@
     }
   });
   document.addEventListener('pointerup', (e)=>{
-    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle, #radioToggle');
+    const el = e.target.closest('button, .swatch, .seg, #settingsToggle, #rankToggle');
     if(el) playClick(false, clickIntensityFor(el));
   });
 
@@ -2452,9 +2497,12 @@
 
   let isMuted = false;
   const muteBtn = document.getElementById('muteBtn');
+  const muteBtnIcon = document.getElementById('muteBtnIcon');
+  const muteBtnLabel = document.getElementById('muteBtnLabel');
   muteBtn.addEventListener('click', ()=>{
     isMuted = !isMuted;
-    muteBtn.textContent = isMuted ? 'Unmute' : 'Mute';
+    muteBtnIcon.textContent = isMuted ? '🔊' : '🔇';
+    muteBtnLabel.textContent = isMuted ? 'Unmute' : 'Mute';
     muteBtn.classList.toggle('danger', isMuted);
     if(master) master.gain.setTargetAtTime(isMuted ? 0 : 0.9, actx.currentTime, 0.05);
   });
@@ -2524,7 +2572,7 @@
     radioOverlay.classList.remove('open');
     playSwoosh(false);
   }
-  radioToggle.addEventListener('click', openRadio);
+  if(radioToggle) radioToggle.addEventListener('click', openRadio);
   closeRadio.addEventListener('click', closeRadioPanel);
   radioOverlay.addEventListener('click', (e)=>{
     if(e.target === radioOverlay) closeRadioPanel();
@@ -2762,5 +2810,6 @@
   }, {passive:false});
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
