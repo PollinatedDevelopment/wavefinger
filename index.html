@@ -1039,7 +1039,44 @@
     display:block;
     opacity:1;
   }
-  </style>
+  
+  /* Desktop web-app layout: use the full screen instead of the phone-width shell. */
+  @media (min-width: 900px) {
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #app {
+      width: 100%;
+      max-width: none;
+      min-height: 100dvh;
+      margin: 0;
+      box-shadow: none;
+    }
+
+    header {
+      padding-left: 24px;
+      padding-right: 24px;
+    }
+
+    #canvasStage {
+      margin-left: 20px;
+      margin-right: 20px;
+    }
+
+    #dock {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+
+    #settingsSheet, #rankSheet, #radioSheet {
+      max-width: 720px;
+    }
+  }
+
+</style>
 </head>
 <body style="background: rgb(255, 255, 255);">
 <div id="bootWarning">
